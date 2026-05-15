@@ -1,0 +1,73 @@
+Welcome back. Topic four. Control flow.
+
+In the last three topics we covered values, names, and operators. Now we look at how execution branches and repeats. Conditionals. Multi-way branching. Loops. And the jump statements that escape them.
+
+We covered the statement-versus-expression philosophy in topic three, so I will not repeat it. The short version. Scala and Kotlin make almost every control-flow construct an expression. Java is statement-oriented with some expression forms added recently. JavaScript and TypeScript are statement-oriented with ternary as the only inline branch. Python is statement-oriented with a small conditional-expression form. Keep that distinction in mind as we walk through each construct.
+
+Start with conditionals. The basic if-else is uniform across all six. The keyword is if. Parentheses around the condition in Java, Scala, Kotlin, JavaScript, TypeScript. No parentheses in Python — Python uses a colon at the end of the line and indentation for the body.
+
+Else-if chains differ slightly. Python writes elif, a contraction of else-if, as a single keyword. Every other language writes else if as two words.
+
+The ternary operator. C-style. Condition, question mark, value if true, colon, value if false. Java, JavaScript, and TypeScript use this form. Scala and Kotlin do not have it at all, because their if is already an expression — you write val x equals if c then a else b. Python uses the postfix conditional. a if c else b. Reads as English. Some love it, some hate it.
+
+Move to multi-way branching. This is where the languages diverge most violently.
+
+Picture a pattern-matching power ladder. Five rungs from minimal to maximal.
+
+Rung one. Constants-only switch. The original Java pre-fourteen switch and the JavaScript switch. Each case matches a constant. Fall-through is the default. You must write break to stop. Forgetting break is the single most common control-flow bug in both languages.
+
+Rung two. Switch expression. Java fourteen added the arrow-syntax switch. Case one arrow some-expression. No fall-through. Returns a value. Can be used inside an assignment.
+
+Rung three. Type patterns. Kotlin's when has had this since the language started. Case is String. Case is Int. The matched variable smart-casts to the matched type inside the branch. Java twenty-one added the same capability to switch.
+
+Rung four. Structural patterns with destructuring. Python three point ten added match-case with structural matching. Case Point with x equals zero. Case bracket-x-comma-y-bracket for destructuring a two-element sequence. Java twenty-one added record patterns.
+
+Rung five. Full pattern matching with extractors. Scala's match. Case classes, sealed traits, unapply methods, guards, nested patterns. The most powerful form, and the inspiration for everything else on this ladder.
+
+JavaScript and TypeScript stay on rung one. They have constant-only switch with fall-through and no expression form. The TC-thirty-nine pattern-matching proposal exists but has not landed.
+
+Kotlin's when deserves its own note. It can be used with a subject, like a traditional switch — when paren x paren, then a series of arrow cases. It can also be used without a subject — just when, then conditions like x greater-than zero arrow "positive". The subject-less form replaces if-else chains. Always an expression. Always returns a value. Exhaustiveness is checked when when is used as an expression over a sealed type. Kotlin is the multi-way construct most worth importing into your mental model.
+
+Python's match deserves a clarification. Despite the surface syntax that looks like switch, it is not a switch lookalike. It is structural pattern matching. Case one matches the literal one. But case bracket-x-y-bracket destructures a two-element sequence. Case Point paren x equals zero paren matches a Point with x equals zero. Case curly-quote-name-quote-colon-name-curly matches a dict with a name key. We will cover the full destructuring power in topic eight when we look at classes.
+
+Loops. There are roughly five loop forms, and not every language has all five.
+
+The C-style counted for loop. For paren initializer semicolon condition semicolon step paren. Java, JavaScript, and TypeScript have this. Scala, Kotlin, and Python do not — they consider it too imperative.
+
+The for-each loop. For x in collection. Universal across all six, with small syntax differences. Java says for paren T x colon coll paren. Scala says for paren x left-arrow coll paren. Kotlin says for paren x in coll paren. JavaScript and TypeScript say for paren const x of coll paren. Python says for x in coll colon.
+
+JavaScript has a famous trap here. It has both for-in and for-of. For-in iterates the keys of an object. For-of iterates the values of an iterable. Modern JavaScript almost always wants for-of. The for-in form is legacy from when objects-as-dictionaries were the only collection type. Use for-of unless you specifically need keys.
+
+The while loop. Uniform across all six.
+
+The do-while loop. Java, Kotlin, JavaScript, and TypeScript have it. Python does not — you write while True with a break at the bottom. Scala three removed do-while, replacing it with a weird while-with-block form that is rarely needed.
+
+Ranges. Java has no native range — you call IntStream dot range or IntStream dot rangeClosed. Scala uses words. Zero to n is inclusive. Zero until n is exclusive. Kotlin uses operators. Zero dot dot n is inclusive. Zero until n is exclusive. N downTo zero counts down. Python uses the function form. Range paren n paren is exclusive. Range paren start comma stop comma step paren takes step. JavaScript has no range at all — you write a counted for loop or Array dot from with a callback.
+
+Iterate with index. Python's enumerate is the cleanest — for i comma x in enumerate paren coll paren colon. Kotlin's withIndex is similar — for paren paren i comma x paren in coll dot withIndex paren paren paren. Scala's zipWithIndex returns tuples in reverse order from Kotlin — paren x comma i paren rather than paren i comma x paren — easy to get wrong. JavaScript uses array dot entries returning bracket-index-comma-value pairs. Java requires manual index management.
+
+Comprehensions are a syntactic feature unique to Python and Scala.
+
+Python writes bracket f-paren-x-paren for x in xs if p-paren-x-paren bracket. The expression first, then the iteration, then the optional filter. The same shape works for dict comprehensions with curly braces, and set comprehensions with curly braces no key-value, and generator expressions with parentheses.
+
+Scala writes for curly-brace x left-arrow xs semicolon if p-paren-x-paren curly-brace yield f-paren-x-paren. Or with parentheses. The generator-and-filter clauses come first, then yield produces the output value. Nested for clauses give you nested loops.
+
+The other four languages use functional chains. xs dot filter paren p paren dot map paren f paren. Java with streams. JavaScript and TypeScript with array methods. Kotlin with sequence operations. Same operation, no special syntax.
+
+The choice between comprehensions and functional chains is mostly stylistic. Comprehensions read better for nested iteration. Functional chains compose better and short-circuit more easily on infinite or lazy sources. Both are good. Pick whichever your language gives you.
+
+Jump statements. Last cluster.
+
+Break, continue, return. All six languages have return. Java, Kotlin, JavaScript, TypeScript, and Python have break and continue.
+
+Scala does not have break or continue. By design. They were considered uncomposable. The expressive substitutes are guard clauses inside for-comprehensions, recursive helpers, and methods like find, takeWhile, dropWhile. If you reach for break in Scala more than once a quarter, you are probably structuring loops wrong. There is a library escape hatch, scala dot util dot control dot Breaks, but using it is a code smell.
+
+Labeled break and labeled continue. Java uses break label semicolon. Kotlin uses break at-label, with the at sign. JavaScript uses the same syntax as Java. These let you break out of more than one nested loop at once.
+
+Non-local return from a lambda is a Scala and Kotlin feature. In Scala, you can write return inside a lambda and it exits the enclosing named method, not the lambda. Implemented via a thrown exception, which has a real performance cost in hot paths. Kotlin requires the return at label syntax to make the target explicit. Java forbids non-local return outright.
+
+Python has one truly unique feature. The for-else and while-else construct. A Python loop can have an else clause that runs only if the loop completed without hitting break. Useful for the search-and-report idiom. You write the success path inside the loop with break. You write the not-found path inside else. The keyword else is misleading — mentally read it as nobreak.
+
+To recap. Conditionals are uniform across the six, with the if-expression versus if-statement divide we covered in topic three. Multi-way branching diverges on a power ladder from JavaScript's constants-only switch up to Scala's full extractors. Loops have roughly five forms — counted, for-each, while, do-while, range — and not every language has all five. Comprehensions are a Python and Scala feature; everyone else uses functional chains. Jump statements are uniform with two exceptions — Scala omits break and continue by design, and Python adds the for-else clause.
+
+That is topic four. Control flow. Next topic. Functions. Where we look at how to declare, how to pass parameters, how to capture closures, and how higher-order functions reshape the way you structure code.
