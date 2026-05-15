@@ -1,0 +1,111 @@
+Welcome back. Topic five. Functions.
+
+In the last topic we covered control flow — how execution branches and repeats. Now we look at how to bundle code into a callable unit, what you can pass in, what you can return, and how a function captures the scope around it.
+
+Five clusters. Declaration. Parameters. Function values and lambdas. Closures and higher-order patterns. And tail calls, async, and generators — three orthogonal extensions to the basic model.
+
+Start with declaration. Where a function can live and what its signature looks like.
+
+Java is the loudest outlier here. Every callable must be a method on a class or an interface. There is no free top-level function. Even the entry point — the famous public static void main, with a string array of arguments — is a method on a class. Scala, Kotlin, JavaScript, TypeScript, and Python all let you write a function at the top level of a file with no enclosing class.
+
+The function keyword. Java has none — you write the return type and then the name. Scala uses def. Kotlin uses fun. JavaScript uses function or the arrow form. TypeScript inherits from JavaScript. Python uses def. So def, fun, function, or no keyword at all. Five distinct conventions across six languages.
+
+Return-type position. Java puts the type before the name — int f, parens, body. Scala and Kotlin put it after the parameter list with a colon — def f, parens, colon Int. TypeScript follows the same colon convention. Python uses the arrow notation — def f, parens, arrow int, colon — but it is only a hint, not enforced at runtime. JavaScript has no return type because it is dynamically typed.
+
+The no-return type. Java uses void. Scala and Kotlin use Unit, which is a real type with a single value. JavaScript implicitly returns undefined. TypeScript writes void in the type position. Python implicitly returns None.
+
+Expression-bodied functions. Scala writes def f, parens, x colon Int, equals x times two — no braces, no return keyword, the equals sign signals "this whole expression is the body". Kotlin matches that syntax. JavaScript and TypeScript use arrow functions for the same effect — parens x, fat arrow, x times two. Python's lambda x colon x times two is the equivalent — but Python's lambda is expression-only, no multi-statement body. Java has no expression-bodied functions — every method needs braces and an explicit return.
+
+Forward reference. JavaScript hoists function declarations — you can call f from line one even if it is defined on line ten. But if you write const f equals parens, fat arrow, body — the const is not hoisted. You hit the temporal dead zone, and you get a reference-error if you call it before the assignment line. Python does not hoist at all. Scala and Kotlin enforce scope rules but allow forward reference within the same class or object.
+
+Multiple return values. Java has no native form — you build a class, a record, or use a library tuple. Scala has tuples — return parens a comma b. Kotlin has Pair, Triple, or you write a data class. JavaScript and TypeScript use arrays or objects with destructuring at the call site. Python returns a comma-separated tuple — return a comma b — which is the most natural of the six.
+
+Move to parameters.
+
+Default parameter values. Five out of six have them. Java is the holdout — the workaround is method overloading or the builder pattern. Everywhere else, you write x equals zero in the parameter list, and callers can omit the argument.
+
+Named arguments at the call site. Scala, Kotlin, and Python let you write f, parens, x equals one — you name the argument when calling. Java has none. JavaScript and TypeScript have none either — but they have a workaround. Pass a single object literal — f, parens, curly x colon one comma y colon two curly — and destructure it inside. TypeScript types this as a destructured parameter object. It reads almost like named arguments.
+
+Varargs. The "accept any number of arguments" form. Java uses T dot dot dot xs. Scala uses xs colon T star. Kotlin uses the keyword vararg. JavaScript and TypeScript use the spread operator — dot dot dot xs. Python uses star args. Six different surface syntaxes for the same idea.
+
+Keyword-collecting parameters. Python and JavaScript-via-object are the only ones. Python's double-star kwargs collects all unnamed keyword arguments into a dictionary. JavaScript's object-literal-as-args pattern is the cultural equivalent. The other four have nothing comparable.
+
+Python has two extra markers worth knowing. The slash in the parameter list marks all parameters before it as positional-only — you cannot pass them by name. The star marks all parameters after it as keyword-only — you must pass them by name. Both were added in Python three point eight to give library authors more control over their API surface.
+
+The this-or-self parameter. In Java, Scala, Kotlin, JavaScript, TypeScript — this is implicit. The method receives a hidden this binding. JavaScript's this is rebindable per call site, which is a famous source of bugs we will get to in a moment. Python is unique — self is an explicit first parameter on every method. The PEP eight rationale is readability — if a function is bound to a class, you should see that in the signature.
+
+Move to function values and lambdas.
+
+A function value is a callable that you can store in a variable, pass as an argument, or return from another function. A lambda is the syntax for writing one inline.
+
+Java did not have function values or lambdas until version eight. And even now, Java's "function values" are not really first-class. They are instances of single-abstract-method interfaces — Function, Predicate, Consumer, Supplier, BiFunction. Each parameter-arity and return-shape combination has its own interface. Calling one is f dot apply parens x, not f parens x. Useful, but a layer of ceremony the others do not have.
+
+The lambda syntax across the six. Java uses the arrow — parens x, arrow, x plus one. Scala uses the fat arrow — parens x colon Int, fat arrow, x plus one. Kotlin uses curly braces with the arrow inside — curly x colon Int, arrow, x plus one, curly. JavaScript and TypeScript use the fat arrow — parens x, fat arrow, x plus one. Python uses the lambda keyword — lambda x colon x plus one.
+
+Function types in the type system. Scala writes Int fat arrow String. Kotlin writes parens Int, arrow, String. TypeScript writes parens x colon number, fat arrow, string. Java uses the generic interface — Function angle Integer comma String angle. Python uses Callable bracket bracket int bracket comma str bracket — verbose but explicit. JavaScript has no function type because it is dynamically typed.
+
+Implicit single-parameter name. This is a Kotlin idiom worth knowing. If a lambda has exactly one parameter, you can omit the parameter name and the arrow — and reference the parameter as it. So xs dot map curly it times two curly is shorthand for xs dot map curly x arrow x times two curly. Scala has the underscore placeholder, which is similar but slightly different — xs dot map parens underscore times two parens. The other four languages always require an explicit parameter name.
+
+Method references. Java and Kotlin use the double-colon syntax — String double-colon length means "the length method as a function value". Scala uses eta-expansion via the underscore — String dot length underscore. JavaScript references methods directly — obj dot method — but with the famous footgun that this rebinds per call site, so the bound receiver may be lost. Python references methods directly the same way, with no rebinding issue.
+
+The trailing-lambda call. Kotlin only. If the last argument to a function is a lambda, you write it after the closing parenthesis. So xs dot fold parens zero parens, then curly a comma b arrow a plus b curly. The lambda visually sits outside the call. Combined with implicit it, this is what makes Kotlin code read so close to Ruby or Swift.
+
+Inline functions. Kotlin's inline keyword tells the compiler to substitute the lambda body at every call site, eliminating the lambda allocation and the call overhead. This is what makes Kotlin's collection operations competitive with hand-written loops. You will see inline constantly in the standard library — read it as "this lambda call has zero overhead".
+
+Move to closures and higher-order patterns.
+
+Every language here has closures — functions that capture variables from their enclosing scope. The interesting axis is what you can do with the captured variable.
+
+Reading a captured variable. All six allow it. No surprises.
+
+Capture must be final. Java is the only one that requires this. The captured local must be effectively final — once assigned, never reassigned. The other five let you capture freely mutable variables. The Java designers refused to make captured mutability easy because closures sharing mutable state across thread boundaries is one of the most common JVM concurrency bugs.
+
+Mutating a captured variable. In Java, you cannot — the workaround is to wrap the value in a single-element array or an AtomicReference and mutate the contents. In Scala and Kotlin, you capture a var and assign normally. In JavaScript and TypeScript, you capture a let or a var. In Python, you use the nonlocal x declaration to opt into writing back to the enclosing scope. Python's nonlocal is explicit on purpose for the same reason Java's restriction exists — assignment inside a function defaults to creating a local variable, and the language wants you to opt in to surprising side effects.
+
+Now the most common cross-language footgun — late binding in loops.
+
+Picture this. You write a Python list comprehension — bracket, lambda colon i, for i in range three, bracket. You expect a list of three closures returning zero, one, two. You get a list of three closures all returning two. Why? Because each lambda captures the variable i, not its value at creation time. By the time you call the lambdas, the loop has finished and i is two.
+
+The fix in Python is the default-argument trick — bracket, lambda i equals i colon i, for i in range three, bracket. The default value is evaluated once at lambda-creation time and freezes the value.
+
+JavaScript-with-var has the exact same problem. The fix is to use let. Let creates a fresh binding per iteration of the for loop. Var shares one binding across all iterations.
+
+Scala, Kotlin, and Java do not share this footgun because their for-each loop variable is a fresh binding per iteration by design.
+
+Higher-order patterns. Currying, partial application, composition.
+
+Currying is decomposing a multi-argument function into a chain of single-argument functions. Scala bakes it into the declaration syntax — def f, parens a colon Int, parens b colon Int — two parameter lists. Calling f parens one returns a function expecting the second argument. Everywhere else, you write a function that returns a function — which works but is verbose.
+
+Partial application is fixing some arguments and leaving others open. Scala uses the underscore placeholder — f, parens, underscore colon Int comma five. JavaScript uses the bind method on functions — f dot bind parens null comma five. Python uses functools dot partial. The other languages do it manually with a lambda.
+
+Function composition. Scala provides andThen and compose as built-in methods. Java added Function dot andThen in version eight. Kotlin has compose in the standard library. JavaScript, TypeScript, and Python require manual lambdas — parens x, fat arrow, g parens f parens x — or a third-party library.
+
+Memoization. Caching the result of a function for a given input. Python has functools dot lru cache as a decorator — one line and you have a memoized version. The other five languages require building a cache map manually.
+
+Receiver functions, also called extension functions. Kotlin's fun String dot lastWord, parens, colon String — adds a method-call-syntax function to the String type without modifying it. You then write myString dot lastWord parens and it reads like a method on String. Scala's implicit class achieves the same effect. TypeScript can simulate it via a typed this parameter. The other three have no equivalent — you write a free function and pass the value as the first argument.
+
+Move to tail calls, async, and generators.
+
+Three orthogonal extensions to the basic function model.
+
+Tail-call optimization. The compiler rewrites a recursive call in tail position into a loop, so the call does not consume stack space. Scala has the at-tailrec annotation, which guarantees the optimization for direct self-recursion only, and emits a compile error if the function is not actually tail-recursive. Kotlin has the tailrec keyword, same semantics. The JavaScript spec mandates tail-call optimization since ES six, but no major engine actually implements it. Python and Java do not optimize tail calls at all. The portable answer for deep recursion is to convert to an explicit loop or use an explicit stack.
+
+Async functions. JavaScript and TypeScript use the async keyword on a function declaration. Async function returns a promise, and an await expression suspends until the promise settles. Python uses async def — returns a coroutine, and await suspends until the awaited coroutine yields. Kotlin uses the suspend modifier on a fun — requires a coroutine context, and the suspension is invisible at the call site. Scala uses the Future type with Await dot result, which is blocking and discouraged, or for-comprehensions over futures. Java uses CompletableFuture with explicit chained method calls.
+
+The surface syntax converges on async slash await in three of the six languages. The runtime model underneath — event loop, coroutine scheduler, future execution context — is wildly different. Cover that in per-language repos.
+
+Generators. Functions that suspend at each yield and resume on the next iteration. Python's def with yield is the most natural — write yield x in the body and the function becomes a generator. JavaScript writes function-star, with the asterisk in the keyword, and uses yield the same way. Kotlin builds generators inside a sequence block — sequence curly, yield parens x, curly. Scala uses lazy collections directly — LazyList, formerly called Stream — there is no yield keyword. Java has no generator syntax — you build it with Stream dot generate, Stream dot iterate, or a Spliterator.
+
+A few footguns to call out before we close.
+
+JavaScript's this binding rules. In a regular function, this is determined by the call site. obj dot method parens binds this to obj. But const m equals obj dot method, then m parens — loses the binding. In strict mode, this becomes undefined. Arrow functions are different. They do not have their own this. They capture the surrounding scope's this lexically, like every other language. The rule of thumb. Write fat arrow for callbacks and inline functions. Write the function keyword only when you need a method on an object literal or class.
+
+Default mutable arguments in Python. def f, parens, x equals empty list — evaluates the empty list once at definition time and reuses the same list across all calls. So if f mutates x, the mutation persists across calls. The idiomatic fix is def f, parens, x equals None, and inside the function, x equals x if x is not None else empty list. Most static analysis tools flag this. None of the other five languages share this footgun — they all evaluate default arguments per call.
+
+Java functional interfaces and primitive specializations. Because Java's "function values" are interface instances, and because Java's primitive types are not objects, the standard library has to ship specialized interfaces for each primitive. IntFunction, ToIntFunction, IntUnaryOperator, IntBinaryOperator, and so on. They exist to avoid boxing the primitive into an Integer on the hot path. It is verbose but it is the price of staying primitive-aware in a generics system that does not see primitives.
+
+Scala methods versus functions. A Scala def defines a method, not a function value. Methods become function values via eta-expansion — xs dot map, parens, f underscore — in Scala two, automatic in most positions in Scala three. The distinction rarely matters in everyday code, but in higher-order code with overloading or implicit conversions, it can bite.
+
+To recap. Functions diverge most on declaration — Java's everything-is-a-method, Scala and Kotlin's expression-bodied form, Python's explicit self. Parameters diverge on defaults and named arguments — Java has neither, Python has the most flexibility. Function values are first-class in five of six — Java's are functional-interface objects with apply methods. Closures all work, but Java requires effectively-final captures and Python requires nonlocal to mutate. Higher-order patterns are most natural in Scala, simulated everywhere else. Tail calls work only in Scala and Kotlin, and only for direct self-recursion. Async and generators converge on syntax but diverge on runtime.
+
+That is topic five. Functions. Next topic. Collections and strings. Where we look at the standard sequence, mapping, and set types — and the string type that everyone implements differently underneath.
