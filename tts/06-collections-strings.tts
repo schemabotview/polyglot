@@ -1,0 +1,103 @@
+Welcome back. Topic six. Collections and strings.
+
+In the last topic we covered functions. Now we look at the standard sequence, mapping, and set types — and the string type that everyone implements differently underneath.
+
+Four clusters today. Sequences. Maps and sets. Strings as a type and how you access characters. And finally strings as something you build and format.
+
+Start with sequences.
+
+Every language here has at least two sequence types — the low-level array and the higher-level list or vector. The loudest divergence is mutability defaults.
+
+Java is mutable by default. ArrayList is the workhorse. Java added List dot of in version nine for genuinely immutable lists. Scala is the opposite — immutable by default. Plain List from the standard import is the immutable linked list. Mutating operations return new collections. The mutable equivalents live in scala dot collection dot mutable — ArrayBuffer, mutable Map, mutable Set. Kotlin splits the difference at the type level. List of T is the read-only interface — you cannot call add on it. MutableList of T is the mutable interface. JavaScript arrays are mutable. Python lists are mutable, but Python's tuple is the immutable counterpart.
+
+Array literal syntax. JavaScript and TypeScript use bracket one comma two comma three bracket. Scala uses Array parens one comma two comma three. Kotlin has arrayOf, plus primitive-specialized intArrayOf, doubleArrayOf, and so on. Java uses new int bracket bracket curly one comma two comma three curly — easily the most verbose. Python has no array literal — you use a list, bracket one comma two comma three bracket, or import from the array module if you need primitive-packed storage.
+
+Indexing. Five of the six use the bracket form — xs bracket zero. Scala uses parens — xs parens zero — because in Scala, apply is a method, and indexing is just calling apply. Same surface ergonomics, different conceptual model. Java is split — xs bracket zero on arrays, but xs dot get parens zero on lists.
+
+Negative indexing. Python only. xs bracket negative one is the last element. Everywhere else, you write xs bracket xs dot length minus one or call last. JavaScript added Array dot prototype dot at parens negative one in ES twenty-twenty-two to fix this asymmetry. The older form, xs bracket negative one, returns undefined — because arrays are objects, and negative one is just a property name that does not exist.
+
+Length. Python uses the function form — len parens xs. The other five use a property or method on the value itself. Java arrays have dot length, no parens — it is a field. Java lists have dot size parens — it is a method. Scala arrays have length, Scala lists have size. Kotlin uses size everywhere. JavaScript and TypeScript use length. Confusion alert: Java's String length is a method, dot length parens, but Java's array length is a field, no parens. This catches everyone at least once.
+
+Slicing. Python's bracket i colon j is the cleanest by far — half-open, inclusive-exclusive, missing endpoints default to "from the start" or "to the end". You can add a step with bracket i colon j colon k. The famous bracket double-colon negative one reverses the sequence. Scala has slice parens i comma j. Kotlin has subList. JavaScript and TypeScript have slice. Java has Arrays dot copyOfRange, which is verbose enough that people often write it manually with a loop.
+
+Append, concat, contains. The same three operations spelled differently in each language. Scala uses the operator-rich style — colon plus to append a single element, plus plus to concatenate two sequences. Kotlin uses plain plus for both. JavaScript uses push for in-place append, then bracket dot dot dot xs comma dot dot dot ys bracket — spread inside a literal — for concatenation. Python uses append in-place and plus for concatenation. Java uses add and addAll. The pattern is similar; the spelling diverges.
+
+Membership. Three of the six — Kotlin, Python, and Scala — let you write x in xs as natural language. Java and JavaScript use methods — contains on Java collections, includes on JavaScript arrays. The in keyword is one of those small ergonomic wins that adds up over many lines of code.
+
+Move to maps and sets.
+
+Map literals. Scala writes Map parens quote a quote arrow one — note the arrow, not equals. Kotlin writes mapOf parens quote a quote to one — the to is an infix function that builds a Pair. JavaScript and TypeScript have two forms. The object literal — curly a colon one curly — which has string keys only. And new Map parens bracket bracket quote a quote comma one bracket bracket parens — for any-typed keys. Python writes curly quote a quote colon one curly. Java has Map dot of starting in version nine; before that you wrote out put statements one at a time, which is exhausting.
+
+Map lookup behavior on a missing key. This is where languages diverge sharply. Memorize this list, because the same surface syntax has six different miss behaviors.
+
+Python's bracket form throws KeyError. Python's get with a default returns None or your fallback. Scala's apply form throws NoSuchElementException. Scala's get returns an Option — Some or None. Java's get returns null on miss. Java's getOrDefault is the safe form. Kotlin's bracket form returns null on miss. Kotlin's getOrDefault gives you a fallback. JavaScript object access returns undefined. JavaScript's Map dot get also returns undefined. Same operation, six different miss behaviors.
+
+Iteration over entries. Python is the cleanest — for k comma v in m dot items, colon. Scala uses for parens parens k comma v parens left-arrow m. Kotlin uses for parens parens k comma v parens in m. JavaScript uses Object dot entries on objects, or m dot entries on Maps, with array destructuring — for parens const bracket k comma v bracket of Object dot entries parens o parens. Java uses entrySet — for parens var e colon m dot entrySet parens parens — then e dot getKey, e dot getValue.
+
+Default sequence underneath the map. Python's dict is insertion-ordered as of three point seven. That is a permanent language guarantee, not a CPython implementation detail. JavaScript's Map preserves insertion order since ES six. Java's HashMap does not preserve order — use LinkedHashMap if you need it. Scala's immutable HashMap does not preserve insertion order; immutable VectorMap does.
+
+Sets.
+
+Set literals. Scala writes Set parens one comma two comma three. Kotlin writes setOf parens one comma two comma three. JavaScript writes new Set parens bracket one comma two comma three bracket — the only one that requires the new keyword and a constructor argument. Python writes curly one comma two comma three curly. Java writes Set dot of since version nine.
+
+The empty literal trap. In Python, curly close-curly is an empty *dict*, not a set. The empty set must be written as set parens parens. In JavaScript, curly close-curly is an empty *object*. There is no set literal in JavaScript at all; you write new Set parens parens. These two one-character traps are the most common footguns in this whole topic.
+
+Set algebra. Scala uses operators and word forms — a plus plus b for union, a ampersand b for intersection, a minus minus b for difference, plus the named methods union, intersect, diff. Kotlin uses similar operators plus the word forms. Python uses single-character operators — pipe for union, ampersand for intersection, minus for difference. Java has nothing built in for set algebra at the language level — you reach for Guava's Sets dot union or write it manually with addAll and retainAll. JavaScript has nothing built in either — you write new Set with spread.
+
+Move to strings as a type and how you access characters.
+
+Every language here makes strings immutable. So far so uniform.
+
+The internal encoding diverges. Java, Scala, Kotlin, and JavaScript — all four — store strings as UTF sixteen internally. A char in Java, Scala, and Kotlin is a sixteen-bit unit, not a code point. JavaScript has no separate char type — a single-character string is the closest thing. Python uses PEP three-ninety-three's flexible string representation — the interpreter picks Latin one, UCS two, or UCS four storage depending on the highest code point in the string, but exposes them uniformly as code points. So Python's len gives you the code-point count; the JVM languages and JavaScript give you the UTF sixteen unit count.
+
+This is the second-biggest string footgun across these six. A single emoji outside the basic multilingual plane — most modern emoji — occupies two UTF sixteen code units. So a string with one party-popper emoji has length two in Java, Scala, Kotlin, and JavaScript. Python reports length one. Neither answer is "characters" in the human sense. A flag emoji is two regional-indicator code points. A family emoji is many code points joined by zero-width joiners. For grapheme-cluster correctness — the actual user-visible character count — you need a Unicode library. ICU on the JVM. Intl dot Segmenter in modern JavaScript. The regex package in Python.
+
+Indexing into a string. Python and JavaScript and Kotlin let you write s bracket i. Java requires s dot charAt parens i. Scala uses s parens i. Python's negative-index trick works on strings too — s bracket negative one is the last character. The JVM languages and JavaScript do not have negative string indexing.
+
+Slicing. Python is again cleanest — s bracket i colon j. Scala and Kotlin and Java and JavaScript use substring or slice methods.
+
+Now the *biggest* footgun in the entire topic. Java's double equals on strings.
+
+Quote hello quote double-equals quote hello quote in Java looks like it should compare the strings. It compiles. It often returns true — because the JVM string pool interns string literals, so both sides point to the same instance. But it is comparing references, not contents. The moment you build a string at runtime — read from a file, concatenate from variables, parse from network input — the double equals breaks. New String parens quote hello quote double-equals quote hello quote returns false, even though the contents match.
+
+The fix is dot equals parens. Always use dot equals for string equality in Java.
+
+Scala fixed this by making double equals route through dot equals for any non-null reference type. Kotlin made double equals structural and triple equals reference. JavaScript and Python made double equals or triple equals do value comparison from the start. Java is the only one in this group where double equals on strings is a real bug source — and it has been the number-one Java string bug since the language was created.
+
+Move to building and formatting strings.
+
+String interpolation. Five of the six have it. Java does not.
+
+Scala writes s prefix, then quote value is dollar x quote. The s prefix and the dollar sign mark the interpolation. For an expression rather than a single identifier, you use dollar curly expr curly. Scala also has the f prefix for typed format specifiers, checked at compile time — f prefix, quote dollar x percent zero five d quote. If x is not numeric, it fails to compile.
+
+Kotlin uses the same dollar-sign syntax — but inside any string literal, no prefix needed.
+
+JavaScript and TypeScript use template literals with backticks — backtick value is dollar curly x curly backtick. Backticks, not double quotes. Catches everyone the first time.
+
+Python's f-strings, since version three point six, use f prefix, quote value is curly x curly quote. The curly braces take arbitrary expressions — including method calls, attribute access, slicing, and even formatting specifiers after a colon.
+
+Java has no interpolation. The workarounds are String dot format or text blocks combined with dot formatted parens. The Java template-string proposal has bounced between preview and removal multiple times — do not count on it landing soon.
+
+Joining a collection into a string. Python's tradition is the inverted form — separator dot join parens collection. So comma dot join parens xs. Java uses String dot join parens comma comma xs — the separator first, the collection second. Scala uses xs dot mkString parens comma. Kotlin uses xs dot joinToString parens comma. JavaScript uses xs dot join parens comma. Same operation, different home — sometimes a method on the string, sometimes a method on the collection.
+
+Splitting. The major footgun here — Java, Scala, and Kotlin's split takes a *regular expression*, not a literal string. So splitting on dot matches every character. Splitting on pipe matches between every character. Splitting on backslash needs four backslashes in source, because backslash is special in both the string literal and the regex. The fix in Kotlin is to pass a Char instead of a String — single quotes route through the literal overload. The fix in Java is Pattern dot quote parens. Python's split takes a literal by default; you call re dot split for regex. JavaScript accepts either — a string is literal, a regex object is regex.
+
+Building a string incrementally. The universal "do not concatenate in a loop" warning. Concatenation in a loop is order n-squared in every language here, because strings are immutable — each plus allocates a new buffer and copies both sides. The fix is to collect into a list and join at the end, or use a mutable builder. Java has StringBuilder. Scala has StringBuilder. Kotlin has buildString — a block-form helper that wraps a StringBuilder. JavaScript and Python use the join idiom — collect strings into an array or list, then join with the empty string at the end.
+
+Multi-line strings. Java text blocks since version thirteen — triple-quoted with smart leading-whitespace stripping based on the closing delimiter's indentation. Scala and Kotlin both use triple quotes for raw multi-line strings. Kotlin adds dot trimIndent and dot trimMargin for cleaning up the leading whitespace. JavaScript template literals — the backtick form — preserve every whitespace character literally including indentation, which surprises everyone the first time they use them inside an indented block. Python triple-quoted strings preserve whitespace too; textwrap dot dedent is the cleanup tool.
+
+Raw strings. Strings where backslash is just a backslash. Scala has raw prefix, then quote dot dot dot quote. Kotlin's triple-quoted form is automatically raw. Python uses r prefix, then quote dot dot dot quote. JavaScript uses String dot raw with template literals. Java has no raw-string syntax — text blocks help with newlines but not with backslashes.
+
+A few more cross-cutting notes before we close.
+
+Java boxing on the collection boundary. Java collections are generic, and generics are erased to Object at runtime. So List of Integer boxes every int into an Integer object on insert and unboxes on read. This is a real performance hit on hot paths. The workarounds are int bracket bracket arrays, IntStream from java dot util dot stream, or third-party primitive-specialized collections like Eclipse Collections or fastutil. The other five do not have this problem because they either have no primitives — JavaScript and Python — or their primitive arrays bypass generics. Kotlin's IntArray. Scala's Array of Int.
+
+Kotlin's List is read-only, not immutable. List of T is the read-only interface — you cannot call add. But the underlying instance might be a MutableList that someone else is mutating concurrently. So List of T is a guarantee about *your* call sites, not a guarantee about the value. For true immutability, copy on input, or use the kotlinx dot collections dot immutable library. Java's List dot of since version nine is genuinely immutable — calling add throws UnsupportedOperationException.
+
+JavaScript objects versus Maps. Pre ES six, Object was the only key-value type. Keys had to be strings — numbers got coerced. Iteration order was implementation-defined. ES six added the proper Map type — any-typed keys, insertion-ordered, with a size property. Use Map when keys are not statically known strings. Use Object — or Record K V in TypeScript — when you have a fixed schema. Common bug: using an object as a hash map and being surprised by underscore underscore proto underscore underscore, constructor, or hasOwnProperty colliding with real keys.
+
+Slicing semantics across all six are half-open. Index i inclusive, index j exclusive. So xs bracket two colon five returns three elements at indices two, three, four. This is universal — there are no off-by-one differences across these six on the half-open convention.
+
+To recap. Sequences diverge most on mutability defaults — Java and JavaScript and Python mutable, Scala immutable, Kotlin split at the type level. Indexing is uniform with Scala using parens instead of brackets. Negative indexing is Python-only. Maps and sets converge on the basic operations but diverge on miss-key behavior — null, undefined, exception, Option, depending on the language. Strings are immutable everywhere; the internal encoding splits between UTF sixteen on the JVM and JavaScript versus code-point storage in Python. Java's double equals on strings is the language's most-bitten footgun. Interpolation lives in five of six — Java is the holdout. Building strings in a loop is order n-squared everywhere; use a builder or the join idiom.
+
+That is topic six. Collections and strings. Next topic. Errors, null safety, and resources. Where we look at how exceptions propagate, how each language handles the absence of a value, and how you guarantee cleanup at the boundary.
