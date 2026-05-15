@@ -1,0 +1,127 @@
+<svg viewBox="0 0 540 220" width="540" height="220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      /* ── Light ──────────────────────────────────────── */
+      .bg           { fill: #f9f9f8; }
+
+      /* Section frame */
+      .frame-fill   { fill: #f3f3f0; }
+      .frame-stroke { stroke: #d1d1cb; }
+      .frame-text   { fill: #1a1a18; }
+
+      /* Primitive (green family) */
+      .prim-fill   { fill: #d1fae5; }
+      .prim-stroke { stroke: #6ee7b7; }
+      .prim-text   { fill: #065f46; }
+      .prim-sub    { fill: #059669; }
+
+      /* Tagged/object (blue family) */
+      .tag-fill    { fill: #dbeafe; }
+      .tag-stroke  { stroke: #93c5fd; }
+      .tag-text    { fill: #1e40af; }
+      .tag-sub     { fill: #3b82f6; }
+
+      /* Boxed (orange/yellow family) */
+      .box-fill    { fill: #fefce8; }
+      .box-stroke  { stroke: #fde047; }
+      .box-text    { fill: #713f12; }
+      .box-sub     { fill: #92400e; }
+
+      /* Arrows */
+      .arrow-stroke { stroke: #6b6b65; fill: none; }
+      .arrow-head   { fill: #6b6b65; }
+
+      .muted { fill: #9b9b92; }
+      .lbl   { font-family: system-ui, sans-serif; }
+
+      /* ── Dark ───────────────────────────────────────── */
+      @media (prefers-color-scheme: dark) {
+        .bg           { fill: #222220; }
+        .frame-fill   { fill: #2a2a27; }
+        .frame-stroke { stroke: #484844; }
+        .frame-text   { fill: #f0f0ec; }
+
+        .prim-fill   { fill: #052e16; }
+        .prim-stroke { stroke: #22c55e; }
+        .prim-text   { fill: #bbf7d0; }
+        .prim-sub    { fill: #4ade80; }
+
+        .tag-fill    { fill: #1e3a5f; }
+        .tag-stroke  { stroke: #3b82f6; }
+        .tag-text    { fill: #93c5fd; }
+        .tag-sub     { fill: #60a5fa; }
+
+        .box-fill    { fill: #1c1a05; }
+        .box-stroke  { stroke: #ca8a04; }
+        .box-text    { fill: #fef08a; }
+        .box-sub     { fill: #fcd34d; }
+
+        .arrow-stroke { stroke: #a5a59a; fill: none; }
+        .arrow-head   { fill: #a5a59a; }
+
+        .muted { fill: #6b6b65; }
+      }
+    </style>
+    <marker id="ah" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" class="arrow-head"/>
+    </marker>
+  </defs>
+
+  <rect width="540" height="220" rx="10" class="bg" stroke="none"/>
+
+  <!-- ════════════ Section 1: PRIMITIVE ════════════ -->
+  <rect x="12" y="12" width="168" height="196" rx="8" class="frame-fill frame-stroke" stroke-width="1.5"/>
+  <text x="96" y="32" font-size="11" font-weight="700" text-anchor="middle" class="lbl prim-text">PRIMITIVE</text>
+  <text x="96" y="46" font-size="9" text-anchor="middle" class="lbl muted">Java int · Scala/Kotlin Int</text>
+
+  <text x="96" y="68" font-size="9" font-weight="600" text-anchor="middle" class="lbl frame-text">stack</text>
+
+  <rect x="56" y="80" width="80" height="50" rx="5" class="prim-fill prim-stroke" stroke-width="1.3"/>
+  <text x="96" y="112" font-size="18" font-weight="700" text-anchor="middle" class="lbl prim-text">42</text>
+
+  <text x="96" y="158" font-size="9" text-anchor="middle" class="lbl prim-sub">value lives in slot</text>
+  <text x="96" y="172" font-size="9" text-anchor="middle" class="lbl prim-sub">4 / 8 bytes</text>
+  <text x="96" y="194" font-size="8" text-anchor="middle" class="lbl muted">no heap allocation</text>
+
+  <!-- ════════════ Section 2: TAGGED / OBJECT ════════════ -->
+  <rect x="188" y="12" width="168" height="196" rx="8" class="frame-fill frame-stroke" stroke-width="1.5"/>
+  <text x="272" y="32" font-size="11" font-weight="700" text-anchor="middle" class="lbl tag-text">TAGGED / OBJECT</text>
+  <text x="272" y="46" font-size="9" text-anchor="middle" class="lbl muted">Python int · JS number</text>
+
+  <text x="220" y="68" font-size="9" font-weight="600" text-anchor="middle" class="lbl frame-text">stack</text>
+  <text x="320" y="68" font-size="9" font-weight="600" text-anchor="middle" class="lbl frame-text">heap</text>
+
+  <rect x="200" y="80" width="40" height="50" rx="5" class="tag-fill tag-stroke" stroke-width="1.3"/>
+  <text x="220" y="110" font-size="11" font-weight="600" text-anchor="middle" class="lbl tag-text">ref</text>
+
+  <line x1="242" y1="105" x2="288" y2="105" stroke-width="1.5" class="arrow-stroke" marker-end="url(#ah)"/>
+
+  <rect x="290" y="80" width="60" height="50" rx="5" class="tag-fill tag-stroke" stroke-width="1.3"/>
+  <text x="320" y="102" font-size="9" font-weight="600" text-anchor="middle" class="lbl tag-sub">PyInt</text>
+  <text x="320" y="118" font-size="13" font-weight="700" text-anchor="middle" class="lbl tag-text">42</text>
+
+  <text x="272" y="158" font-size="9" text-anchor="middle" class="lbl tag-sub">ref is the value</text>
+  <text x="272" y="172" font-size="9" text-anchor="middle" class="lbl tag-sub">small-int cache</text>
+  <text x="272" y="194" font-size="8" text-anchor="middle" class="lbl muted">-5..256 reused · V8 SMI</text>
+
+  <!-- ════════════ Section 3: BOXED ════════════ -->
+  <rect x="364" y="12" width="164" height="196" rx="8" class="frame-fill frame-stroke" stroke-width="1.5"/>
+  <text x="446" y="32" font-size="11" font-weight="700" text-anchor="middle" class="lbl box-text">BOXED REFERENCE</text>
+  <text x="446" y="46" font-size="9" text-anchor="middle" class="lbl muted">Java Integer · Kotlin Int?</text>
+
+  <text x="396" y="68" font-size="9" font-weight="600" text-anchor="middle" class="lbl frame-text">stack</text>
+  <text x="494" y="68" font-size="9" font-weight="600" text-anchor="middle" class="lbl frame-text">heap</text>
+
+  <rect x="376" y="80" width="40" height="50" rx="5" class="box-fill box-stroke" stroke-width="1.3"/>
+  <text x="396" y="110" font-size="11" font-weight="600" text-anchor="middle" class="lbl box-text">ref</text>
+
+  <line x1="418" y1="105" x2="464" y2="105" stroke-width="1.5" class="arrow-stroke" marker-end="url(#ah)"/>
+
+  <rect x="466" y="80" width="56" height="50" rx="5" class="box-fill box-stroke" stroke-width="1.3"/>
+  <text x="494" y="102" font-size="9" font-weight="600" text-anchor="middle" class="lbl box-sub">Integer</text>
+  <text x="494" y="118" font-size="13" font-weight="700" text-anchor="middle" class="lbl box-text">42</text>
+
+  <text x="446" y="158" font-size="9" text-anchor="middle" class="lbl box-sub">autobox on demand</text>
+  <text x="446" y="172" font-size="9" text-anchor="middle" class="lbl box-sub">nullable forces box</text>
+  <text x="446" y="194" font-size="8" text-anchor="middle" class="lbl muted">JVM wrapper allocation</text>
+</svg>
