@@ -1,0 +1,61 @@
+Welcome back to the polyglot reference. Topic two. Names, types, and generics.
+
+In topic one we looked at what a value is. In this topic we look at how names refer to values, what types those names carry, and how generics let one declaration cover many types. Four clusters. Names and scoping. Type annotations and inference. Generics. And modules and imports.
+
+We start with scoping, because where a name lives is the foundation everything else builds on.
+
+Picture three different lookup chains. When you write a name in source, the compiler or runtime walks outward from the innermost scope until it finds a binding or fails. The chain looks different in each of the three language families.
+
+In the java virtual machine family — that is, Java, Scala, and Kotlin — the chain goes block, then method, then class, then file or package, then the java virtual machine standard library plus the file's imports. Every name on a class is implicitly visible from any method on that class. You do not need this dot foo to access a class-level foo from inside a method. The class scope is a real lookup level.
+
+In JavaScript and TypeScript, the chain is block — meaning anything inside curly braces when declared with let or const — then function, then module or file, then globalThis. The historical var keyword is different. It is function scoped, ignoring blocks entirely, and it hoists to the top of the enclosing function. We will come back to hoisting in a moment, because it is one of the largest footguns in this entire notebook.
+
+In Python the chain is famously called LEGB. Local, then Enclosing function, then Global at the module level, then Built-in. Notice what is missing. Classes are not a scope level for lookup. Inside a method, if you write foo, Python does not check the class for a foo. You must write self dot foo or ClassName dot foo. This is the most common surprise for programmers coming from Java, Scala, or Kotlin, where the class body acts as a transparent scope.
+
+Now the footguns.
+
+JavaScript hoisting. A var declaration is conceptually moved to the top of the enclosing function and initialized to undefined. So reading the variable before the line where you wrote it gives you undefined, not an error. The let and const keywords also exist from the start of their block, but reading them before the declaration line throws a reference error. That window is called the temporal dead zone. Modern advice. Always use let or const. Never var.
+
+Python closures. Closures can read enclosing names freely. Writing requires explicit declaration. To rebind a name in an enclosing function, write nonlocal x at the top of the inner function. To rebind a module-level name from inside a function, write global x. Without these, the assignment silently creates a new local that shadows the outer name, which is a confusing bug to track down.
+
+Java effectively final. A lambda or anonymous class in Java can capture local variables only if they are effectively final. Meaning, never reassigned after their initial value. The compiler enforces this to avoid the JavaScript-style problem where all closures share one mutable variable. If you remember the classic for-loop bug where setting up several setTimeout callbacks with var i all log the same final value, that is exactly what Java's effectively-final rule prevents.
+
+Move to type annotations and inference. The question is, how do you spell a type in source, and when does the compiler or static checker figure it out for you.
+
+The annotation syntax falls into two camps. Java uses the C-style ordering. Type first, then the name. So int x equals 1. The other five languages all use the colon-separated ordering. Name first, then a colon, then the type. So in Scala, Kotlin, TypeScript, and Python, you write x colon Int equals 1, or some variation on that. The colon style scales better to inference, because you can omit the type and the equals sign keeps the same structure.
+
+All six support some form of inference. Java got the var keyword in version ten, for local variables only. Scala and Kotlin use val and var without the type annotation. JavaScript and TypeScript use const and let. Python uses bare assignment. The catch is that Java and JavaScript do not do full type inference. Java's var works on locals only. JavaScript has no types at all. TypeScript and Scala and Kotlin can infer through complex expressions including lambda parameter types.
+
+Where the languages diverge most is at the type-system level. Scala 3 added union types written A pipe B, intersection types written A ampersand B, and literal types, where the type is the literal itself — like the string quote on quote. TypeScript has had all three for years. Python added union types in version three point ten. Kotlin chose sealed hierarchies instead of union types and stayed there.
+
+Nullability handling diverges entirely. Java has no nullability in the type. You wrap the value in Optional of T to signal possibly-absent, but a plain reference can still be null. Scala uses Option of T at the library level. Kotlin, TypeScript, and Python all encode nullability in the type. Kotlin uses T question mark. TypeScript uses T pipe null. Python uses T pipe None.
+
+When do types get checked. Java, Scala, Kotlin, and TypeScript check at compile time. JavaScript has no compile-time check, because it has no types. Python is the surprising case. Python type hints are pure metadata. The interpreter does not enforce them at runtime. They only become real when you run a separate static checker like mypy or pyright. This is gradual typing, by design. If you call def foo of x colon int with the string hello, Python runs without complaint, and the failure is your job to catch with tooling.
+
+Generics. A single declaration parameterized over types. The big questions. How to declare. How to bound. And how subtyping relates to the type parameter. That last question is called variance, and it is the most confusing concept in this entire notebook for most readers.
+
+Picture three variance modes. Covariant. Contravariant. Invariant. These names sound abstract. They have a concrete meaning.
+
+Covariant. The type parameter T flows only out of the type. Return positions only. You can read from the structure, but you cannot write into it. If Dog is a subtype of Animal, then a List of Dog is a subtype of a List of Animal. Because everything you read out is a Dog, which is also an Animal. The subtype direction is preserved. Scala writes this as plus T in the class declaration. Kotlin writes this as out T.
+
+Contravariant. The type parameter T flows only in. Parameter positions only. You can write into the structure, but you cannot read T out. If Dog is a subtype of Animal, then a Consumer of Animal is a subtype of a Consumer of Dog. The subtype direction is reversed. Read that again. Reversed. Because a consumer that can handle any animal can certainly handle a dog. Scala writes this as minus T. Kotlin writes this as in T.
+
+Invariant. The type parameter T appears both as input and output. Neither subtype direction is safe. Box of Dog and Box of Animal are unrelated types, even though Dog is a subtype of Animal. This is the default in Java and in TypeScript.
+
+Scala and Kotlin let you declare variance at the class definition level. You write plus T or out T once when you define the class, and the rule applies everywhere the class is used. Java has only use-site variance. You write List question-mark extends Animal at the site where you use the list. The famous Java mnemonic is PECS. Producer Extends, Consumer Super. When you need to read from a generic, use question-mark extends — that is the covariant case. When you need to write to a generic, use question-mark super — that is the contravariant case. Even seasoned Java programmers re-derive this from scratch every few months. Memorize PECS.
+
+Type erasure. On the java virtual machine, generic type parameters are erased at runtime. List of String is just List once the bytecode is generated. TypeScript erases all types at compile time. The runtime is plain JavaScript with no type information at all. Python hints exist at runtime in the dunder annotations dictionary, but they are pure metadata. The one escape hatch is Kotlin's inline reified T. When you mark a function as inline and a type parameter as reified, the compiler inlines the function body at every call site and substitutes the real type. So you can access the class literal of T inside the body. Useful for things like checking whether a value is an instance of T.
+
+Last cluster. Modules and imports. How files become a namespace, and how names cross file boundaries.
+
+Java, Scala, and Kotlin use an explicit namespace header at the top of the file. Package com dot foo. Then sub-packages follow the directory structure. JavaScript, TypeScript, and Python use the filesystem path as the implicit namespace. There is no header line that declares what package this file belongs to.
+
+The import syntax falls into two patterns. The java virtual machine languages use the import keyword followed by the dotted path. Like import java dot util dot List. JavaScript and TypeScript use the modern module import syntax. Import curly-brace List curly-brace from quote-dot-slash-m-quote. Python uses from module import Name.
+
+Aliasing during import. Scala uses fat-arrow style mapping inside curly braces. Import java util curly-brace List fat-arrow L. Kotlin and Python use the as keyword. JavaScript and TypeScript use as inside the import curly braces. Java does not have import aliasing at all, which is one of its long-running ergonomic gaps.
+
+Default visibility. Java is package-private by default. You must mark public to expose. Scala and Kotlin default to public, which is the opposite. JavaScript and TypeScript default to not exported. You must write export to expose. Python defaults to public but follows a convention. Names starting with a single underscore are considered private to the module, even though the language does not enforce it.
+
+To recap. Three scope chains. The java virtual machine family walks from block all the way out to the standard library. JavaScript has its scope chain with the hoisting risk on var. Python uses LEGB without classes in the chain. Type annotations are mostly C-style in Java and colon-style everywhere else. Inference exists in all five typed languages, with varying depth. Generics are similar in declaration syntax — angle brackets for Java, Kotlin, TypeScript; square brackets for Scala and modern Python. But variance is where they diverge. Scala and Kotlin let you declare variance at the class. Java only at the use site, with the PECS mnemonic. Modules differ mostly in whether the file's namespace is declared in a header or inferred from the filesystem.
+
+That is topic two. Next topic. Operators and expressions. Where we look at arithmetic, logical, comparison, null coalescing, and the surprisingly divergent rules each language has for what counts as truthy.
