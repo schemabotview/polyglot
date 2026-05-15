@@ -1,0 +1,131 @@
+<svg viewBox="0 0 540 220" width="540" height="220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      /* ── Light ──────────────────────────────────────── */
+      .bg           { fill: #f9f9f8; }
+      .frame-fill   { fill: #f3f3f0; }
+      .frame-stroke { stroke: #d1d1cb; }
+      .frame-text   { fill: #1a1a18; }
+
+      /* Covariant — green (safe-read) */
+      .co-fill   { fill: #d1fae5; }
+      .co-stroke { stroke: #6ee7b7; }
+      .co-text   { fill: #065f46; }
+      .co-sub    { fill: #059669; }
+
+      /* Contravariant — blue (safe-write) */
+      .ctr-fill   { fill: #dbeafe; }
+      .ctr-stroke { stroke: #93c5fd; }
+      .ctr-text   { fill: #1e40af; }
+      .ctr-sub    { fill: #3b82f6; }
+
+      /* Invariant — gray (no relation) */
+      .inv-fill   { fill: #e5e5e2; }
+      .inv-stroke { stroke: #a5a59a; }
+      .inv-text   { fill: #1a1a18; }
+      .inv-sub    { fill: #6b6b65; }
+
+      .muted { fill: #9b9b92; }
+      .lbl   { font-family: system-ui, sans-serif; }
+      .mono  { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+      .co-arrow-stroke  { stroke: #059669; fill: none; }
+      .co-arrow-head    { fill: #059669; }
+      .ctr-arrow-stroke { stroke: #3b82f6; fill: none; }
+      .ctr-arrow-head   { fill: #3b82f6; }
+
+      /* ── Dark ───────────────────────────────────────── */
+      @media (prefers-color-scheme: dark) {
+        .bg           { fill: #222220; }
+        .frame-fill   { fill: #2a2a27; }
+        .frame-stroke { stroke: #484844; }
+        .frame-text   { fill: #f0f0ec; }
+
+        .co-fill   { fill: #052e16; }
+        .co-stroke { stroke: #22c55e; }
+        .co-text   { fill: #bbf7d0; }
+        .co-sub    { fill: #4ade80; }
+
+        .ctr-fill   { fill: #1e3a5f; }
+        .ctr-stroke { stroke: #3b82f6; }
+        .ctr-text   { fill: #93c5fd; }
+        .ctr-sub    { fill: #60a5fa; }
+
+        .inv-fill   { fill: #3a3a37; }
+        .inv-stroke { stroke: #6b6b65; }
+        .inv-text   { fill: #d4d4d0; }
+        .inv-sub    { fill: #a5a59a; }
+
+        .muted { fill: #6b6b65; }
+
+        .co-arrow-stroke  { stroke: #4ade80; fill: none; }
+        .co-arrow-head    { fill: #4ade80; }
+        .ctr-arrow-stroke { stroke: #60a5fa; fill: none; }
+        .ctr-arrow-head   { fill: #60a5fa; }
+      }
+    </style>
+    <marker id="co-h" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0,0 L0,7 L7,3.5 z" class="co-arrow-head"/>
+    </marker>
+    <marker id="ctr-h" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0,0 L0,7 L7,3.5 z" class="ctr-arrow-head"/>
+    </marker>
+  </defs>
+
+  <rect width="540" height="220" rx="10" class="bg" stroke="none"/>
+
+  <!-- ════════════ Section 1: COVARIANT ════════════ -->
+  <rect x="12" y="12" width="168" height="196" rx="8" class="frame-fill frame-stroke" stroke-width="1.5"/>
+  <text x="96" y="32" font-size="11" font-weight="700" text-anchor="middle" class="lbl co-text">COVARIANT</text>
+  <text x="96" y="46" font-size="9" text-anchor="middle" class="lbl co-sub mono">out T  ·  +T</text>
+
+  <text x="96" y="68" font-size="9" text-anchor="middle" class="lbl muted">producer · read-only</text>
+
+  <!-- T flows out arrow -->
+  <line x1="56" y1="100" x2="136" y2="100" stroke-width="2" class="co-arrow-stroke" marker-end="url(#co-h)"/>
+  <text x="96" y="92" font-size="9" font-weight="600" text-anchor="middle" class="lbl co-text">T flows OUT</text>
+
+  <text x="96" y="130" font-size="9" font-weight="600" text-anchor="middle" class="lbl co-text">Dog &lt;: Animal</text>
+  <text x="96" y="146" font-size="9" font-weight="600" text-anchor="middle" class="lbl co-text">⇒ List&lt;Dog&gt; &lt;: List&lt;Animal&gt;</text>
+
+  <text x="96" y="172" font-size="8" text-anchor="middle" class="lbl co-sub">subtype direction</text>
+  <text x="96" y="184" font-size="8" text-anchor="middle" class="lbl co-sub">preserved</text>
+  <text x="96" y="200" font-size="8" text-anchor="middle" class="lbl muted">Scala  +T   ·   Kotlin  out T</text>
+
+  <!-- ════════════ Section 2: CONTRAVARIANT ════════════ -->
+  <rect x="188" y="12" width="168" height="196" rx="8" class="frame-fill frame-stroke" stroke-width="1.5"/>
+  <text x="272" y="32" font-size="11" font-weight="700" text-anchor="middle" class="lbl ctr-text">CONTRAVARIANT</text>
+  <text x="272" y="46" font-size="9" text-anchor="middle" class="lbl ctr-sub mono">in T  ·  -T</text>
+
+  <text x="272" y="68" font-size="9" text-anchor="middle" class="lbl muted">consumer · write-only</text>
+
+  <!-- T flows in arrow (right to left visually = flipped) -->
+  <line x1="312" y1="100" x2="232" y2="100" stroke-width="2" class="ctr-arrow-stroke" marker-end="url(#ctr-h)"/>
+  <text x="272" y="92" font-size="9" font-weight="600" text-anchor="middle" class="lbl ctr-text">T flows IN</text>
+
+  <text x="272" y="130" font-size="9" font-weight="600" text-anchor="middle" class="lbl ctr-text">Dog &lt;: Animal</text>
+  <text x="272" y="146" font-size="9" font-weight="600" text-anchor="middle" class="lbl ctr-text">⇒ Cons&lt;Animal&gt; &lt;: Cons&lt;Dog&gt;</text>
+
+  <text x="272" y="172" font-size="8" text-anchor="middle" class="lbl ctr-sub">subtype direction</text>
+  <text x="272" y="184" font-size="8" text-anchor="middle" class="lbl ctr-sub">reversed</text>
+  <text x="272" y="200" font-size="8" text-anchor="middle" class="lbl muted">Scala  -T   ·   Kotlin  in T</text>
+
+  <!-- ════════════ Section 3: INVARIANT ════════════ -->
+  <rect x="364" y="12" width="164" height="196" rx="8" class="frame-fill frame-stroke" stroke-width="1.5"/>
+  <text x="446" y="32" font-size="11" font-weight="700" text-anchor="middle" class="lbl inv-text">INVARIANT</text>
+  <text x="446" y="46" font-size="9" text-anchor="middle" class="lbl inv-sub mono">T</text>
+
+  <text x="446" y="68" font-size="9" text-anchor="middle" class="lbl muted">both read &amp; write</text>
+
+  <!-- crossed-out arrow indicating no relation -->
+  <line x1="406" y1="100" x2="486" y2="100" stroke-width="1.5" stroke-dasharray="3,3" class="inv-stroke" fill="none"/>
+  <line x1="430" y1="90" x2="462" y2="110" stroke-width="2" class="inv-stroke" fill="none"/>
+  <text x="446" y="92" font-size="9" font-weight="600" text-anchor="middle" class="lbl inv-text">no subtype</text>
+
+  <text x="446" y="130" font-size="9" font-weight="600" text-anchor="middle" class="lbl inv-text">Dog &lt;: Animal</text>
+  <text x="446" y="146" font-size="9" font-weight="600" text-anchor="middle" class="lbl inv-text">⇏ Box&lt;Dog&gt; &lt;: Box&lt;Animal&gt;</text>
+
+  <text x="446" y="172" font-size="8" text-anchor="middle" class="lbl inv-sub">unrelated types</text>
+  <text x="446" y="184" font-size="8" text-anchor="middle" class="lbl inv-sub">at the generic level</text>
+  <text x="446" y="200" font-size="8" text-anchor="middle" class="lbl muted">Java default · TS default</text>
+</svg>

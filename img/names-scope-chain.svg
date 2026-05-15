@@ -1,0 +1,146 @@
+<svg viewBox="0 0 540 280" width="540" height="280" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      /* ── Light ──────────────────────────────────────── */
+      .bg           { fill: #f9f9f8; }
+      .frame-fill   { fill: #f3f3f0; }
+      .frame-stroke { stroke: #d1d1cb; }
+      .frame-text   { fill: #1a1a18; }
+
+      /* JVM family (purple) */
+      .jvm-fill   { fill: #ede9fe; }
+      .jvm-stroke { stroke: #c4b5fd; }
+      .jvm-text   { fill: #5b21b6; }
+
+      /* JS / TS (yellow) */
+      .js-fill    { fill: #fefce8; }
+      .js-stroke  { stroke: #fde047; }
+      .js-text    { fill: #713f12; }
+
+      /* Python (green) */
+      .py-fill    { fill: #d1fae5; }
+      .py-stroke  { stroke: #6ee7b7; }
+      .py-text    { fill: #065f46; }
+
+      .arrow-stroke { stroke: #6b6b65; fill: none; }
+      .arrow-head   { fill: #6b6b65; }
+      .muted        { fill: #9b9b92; }
+      .lbl          { font-family: system-ui, sans-serif; }
+
+      /* ── Dark ───────────────────────────────────────── */
+      @media (prefers-color-scheme: dark) {
+        .bg           { fill: #222220; }
+        .frame-fill   { fill: #2a2a27; }
+        .frame-stroke { stroke: #484844; }
+        .frame-text   { fill: #f0f0ec; }
+
+        .jvm-fill   { fill: #2e1065; }
+        .jvm-stroke { stroke: #a78bfa; }
+        .jvm-text   { fill: #ddd6fe; }
+
+        .js-fill    { fill: #1c1a05; }
+        .js-stroke  { stroke: #ca8a04; }
+        .js-text    { fill: #fef08a; }
+
+        .py-fill    { fill: #052e16; }
+        .py-stroke  { stroke: #22c55e; }
+        .py-text    { fill: #bbf7d0; }
+
+        .arrow-stroke { stroke: #a5a59a; fill: none; }
+        .arrow-head   { fill: #a5a59a; }
+        .muted        { fill: #6b6b65; }
+      }
+    </style>
+    <marker id="ah" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" class="arrow-head"/>
+    </marker>
+  </defs>
+
+  <rect width="540" height="280" rx="10" class="bg" stroke="none"/>
+
+  <!-- ════════════ Column 1: JVM family ════════════ -->
+  <rect x="12" y="12" width="168" height="256" rx="8" class="frame-fill frame-stroke" stroke-width="1.5"/>
+  <text x="96" y="30" font-size="11" font-weight="700" text-anchor="middle" class="lbl jvm-text">JVM family</text>
+  <text x="96" y="44" font-size="9" text-anchor="middle" class="lbl muted">Java · Scala · Kotlin</text>
+
+  <rect x="32" y="58" width="128" height="24" rx="4" class="jvm-fill jvm-stroke" stroke-width="1.1"/>
+  <text x="96" y="74" font-size="9.5" text-anchor="middle" class="lbl jvm-text">JVM stdlib + imports</text>
+
+  <line x1="96" y1="96" x2="96" y2="86" stroke-width="1.3" class="arrow-stroke" marker-end="url(#ah)"/>
+
+  <rect x="32" y="96" width="128" height="24" rx="4" class="jvm-fill jvm-stroke" stroke-width="1.1"/>
+  <text x="96" y="112" font-size="9.5" text-anchor="middle" class="lbl jvm-text">package / file</text>
+
+  <line x1="96" y1="134" x2="96" y2="124" stroke-width="1.3" class="arrow-stroke" marker-end="url(#ah)"/>
+
+  <rect x="32" y="134" width="128" height="24" rx="4" class="jvm-fill jvm-stroke" stroke-width="1.1"/>
+  <text x="96" y="150" font-size="9.5" text-anchor="middle" class="lbl jvm-text">class / object</text>
+
+  <line x1="96" y1="172" x2="96" y2="162" stroke-width="1.3" class="arrow-stroke" marker-end="url(#ah)"/>
+
+  <rect x="32" y="172" width="128" height="24" rx="4" class="jvm-fill jvm-stroke" stroke-width="1.1"/>
+  <text x="96" y="188" font-size="9.5" text-anchor="middle" class="lbl jvm-text">method / fn</text>
+
+  <line x1="96" y1="210" x2="96" y2="200" stroke-width="1.3" class="arrow-stroke" marker-end="url(#ah)"/>
+
+  <rect x="32" y="210" width="128" height="24" rx="4" class="jvm-fill jvm-stroke" stroke-width="1.3"/>
+  <text x="96" y="226" font-size="9.5" font-weight="700" text-anchor="middle" class="lbl jvm-text">block { }</text>
+
+  <text x="96" y="256" font-size="8" text-anchor="middle" class="lbl muted">lookup starts here ↑</text>
+
+  <!-- ════════════ Column 2: JS / TS ════════════ -->
+  <rect x="188" y="12" width="168" height="256" rx="8" class="frame-fill frame-stroke" stroke-width="1.5"/>
+  <text x="272" y="30" font-size="11" font-weight="700" text-anchor="middle" class="lbl js-text">JavaScript / TypeScript</text>
+  <text x="272" y="44" font-size="9" text-anchor="middle" class="lbl muted">scope chain</text>
+
+  <rect x="208" y="58" width="128" height="24" rx="4" class="js-fill js-stroke" stroke-width="1.1"/>
+  <text x="272" y="74" font-size="9.5" text-anchor="middle" class="lbl js-text">globalThis</text>
+
+  <line x1="272" y1="96" x2="272" y2="86" stroke-width="1.3" class="arrow-stroke" marker-end="url(#ah)"/>
+
+  <rect x="208" y="96" width="128" height="24" rx="4" class="js-fill js-stroke" stroke-width="1.1"/>
+  <text x="272" y="112" font-size="9.5" text-anchor="middle" class="lbl js-text">module / file</text>
+
+  <line x1="272" y1="134" x2="272" y2="124" stroke-width="1.3" class="arrow-stroke" marker-end="url(#ah)"/>
+
+  <rect x="208" y="134" width="128" height="24" rx="4" class="js-fill js-stroke" stroke-width="1.1"/>
+  <text x="272" y="150" font-size="9.5" text-anchor="middle" class="lbl js-text">function</text>
+
+  <line x1="272" y1="172" x2="272" y2="162" stroke-width="1.3" class="arrow-stroke" marker-end="url(#ah)"/>
+
+  <rect x="208" y="172" width="128" height="24" rx="4" class="js-fill js-stroke" stroke-width="1.1"/>
+  <text x="272" y="188" font-size="9.5" text-anchor="middle" class="lbl js-text">nested fn (closure)</text>
+
+  <line x1="272" y1="210" x2="272" y2="200" stroke-width="1.3" class="arrow-stroke" marker-end="url(#ah)"/>
+
+  <rect x="208" y="210" width="128" height="24" rx="4" class="js-fill js-stroke" stroke-width="1.3"/>
+  <text x="272" y="226" font-size="9.5" font-weight="700" text-anchor="middle" class="lbl js-text">block (let / const)</text>
+
+  <text x="272" y="256" font-size="8" text-anchor="middle" class="lbl muted">var hoists to function ⚠</text>
+
+  <!-- ════════════ Column 3: Python LEGB ════════════ -->
+  <rect x="364" y="12" width="164" height="256" rx="8" class="frame-fill frame-stroke" stroke-width="1.5"/>
+  <text x="446" y="30" font-size="11" font-weight="700" text-anchor="middle" class="lbl py-text">Python — LEGB</text>
+  <text x="446" y="44" font-size="9" text-anchor="middle" class="lbl muted">no block scope</text>
+
+  <rect x="382" y="72" width="128" height="24" rx="4" class="py-fill py-stroke" stroke-width="1.1"/>
+  <text x="446" y="88" font-size="9.5" text-anchor="middle" class="lbl py-text"><tspan font-weight="700">B</tspan> · Built-in</text>
+
+  <line x1="446" y1="110" x2="446" y2="100" stroke-width="1.3" class="arrow-stroke" marker-end="url(#ah)"/>
+
+  <rect x="382" y="110" width="128" height="24" rx="4" class="py-fill py-stroke" stroke-width="1.1"/>
+  <text x="446" y="126" font-size="9.5" text-anchor="middle" class="lbl py-text"><tspan font-weight="700">G</tspan> · Global (module)</text>
+
+  <line x1="446" y1="148" x2="446" y2="138" stroke-width="1.3" class="arrow-stroke" marker-end="url(#ah)"/>
+
+  <rect x="382" y="148" width="128" height="24" rx="4" class="py-fill py-stroke" stroke-width="1.1"/>
+  <text x="446" y="164" font-size="9.5" text-anchor="middle" class="lbl py-text"><tspan font-weight="700">E</tspan> · Enclosing fn</text>
+
+  <line x1="446" y1="186" x2="446" y2="176" stroke-width="1.3" class="arrow-stroke" marker-end="url(#ah)"/>
+
+  <rect x="382" y="186" width="128" height="24" rx="4" class="py-fill py-stroke" stroke-width="1.3"/>
+  <text x="446" y="202" font-size="9.5" font-weight="700" text-anchor="middle" class="lbl py-text"><tspan>L</tspan> · Local (function)</text>
+
+  <text x="446" y="232" font-size="8" text-anchor="middle" class="lbl muted">classes are NOT a scope level</text>
+  <text x="446" y="244" font-size="8" text-anchor="middle" class="lbl muted">for lookup from methods</text>
+</svg>
