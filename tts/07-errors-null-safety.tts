@@ -1,0 +1,111 @@
+Welcome back. Topic seven. Errors, null safety, and resources.
+
+In the last topic we covered collections and strings. Now we look at how a function signals "I cannot return what you asked for" — exceptions, null sentinels, optional types — and how you guarantee cleanup of resources held during the failure.
+
+Four clusters today. Exception handling. Null and undefined. Optional and result types. And resource management — the syntactic forms that close files and release locks even when the body throws.
+
+Start with exceptions.
+
+The basic try-catch-finally shape is uniform across all six. Throw or raise an exception, catch it by type, optionally clean up in finally. The divergences are around three things. What counts as an exception. Whether the compiler tracks them. And whether try itself is an expression.
+
+Surface syntax. Java writes try, braces, body, braces, catch, parens, type and variable, parens, braces, handler, braces. Kotlin and JavaScript and TypeScript follow the same shape with minor variations. Scala writes try braces body braces, then catch braces, then a series of case patterns inside the catch — the catch block is a partial function, not a parameter list. Python writes try colon, body, except, type, as, variable, colon, body. Indentation-driven, no braces.
+
+Throwing. Java says throw new RuntimeException, parens, message. Scala and Kotlin are similar — Kotlin drops the new keyword because constructors do not need it. JavaScript says throw new Error, parens. Python says raise ValueError, parens. Same operation, three keywords — throw, throw, raise.
+
+Multi-catch. Java seven added the pipe-separated form — catch, parens, A pipe B, e — to handle two exception types with one block. Python uses tuple syntax — except parens A comma B parens as e. Kotlin and JavaScript and TypeScript do not have a multi-catch form — write multiple catch blocks instead. Scala uses pattern alternatives inside the case match.
+
+Catch any. Each language has a way to catch everything, but each has a different recommendation about when to use it.
+
+Java's catch parens Exception e catches all checked and unchecked exceptions but not Errors like OutOfMemoryError. Catch parens Throwable e catches absolutely everything — almost never what you want.
+
+Scala and Kotlin's case underscore colon Throwable, or catch parens e colon Throwable — same considerations. Catch Exception is usually the right level.
+
+JavaScript's catch parens e catches everything because everything is throwable, including non-Error values. TypeScript four point four made the type explicit — catch parens e colon unknown — which forces you to narrow the type before using e.
+
+Python's bare except colon catches BaseException, which includes KeyboardInterrupt and SystemExit. So a careless bare except blocks control-C. Use except Exception colon instead.
+
+Re-throwing without losing the stack trace. Each language has the right way. Java, Scala, Kotlin, JavaScript — throw e with the same instance preserves the stack. Python — bare raise with no arguments preserves the original traceback. Python also has raise NewException from e, which chains the new exception with the original attached as the underscore-underscore cause attribute. The footgun in Java is throw new RuntimeException, parens, e dot getMessage. That copies the message but loses the original type and the stack. The fix is throw new RuntimeException, parens, quote context quote comma e — pass the cause as a second argument.
+
+Now Java's checked exceptions. The single most-debated language design choice on this list.
+
+When Java was designed, the team chose to track recoverable exceptions in the type system. Methods declare throws IOException. Callers must either catch IOException or re-declare it on their own signature. The intent was that no IOException would ever be silently lost.
+
+In practice, three problems emerged. First, lambdas. Function dot apply is not declared to throw checked exceptions, so you cannot use a method that throws IOException directly inside Stream dot map without wrapping. Second, propagation. If a checked exception bubbles through a layer that does not know about it, you must wrap it — usually in RuntimeException — defeating the original intent. Third, ergonomics. Most failures are unrecoverable. The compiler-enforced ceremony rarely improves the code.
+
+Modern Java tends toward unchecked-only. Spring deliberately wraps every checked exception. Kotlin, which targets the JVM and interops with Java, deliberately omits checked exceptions entirely. From Kotlin's view, calling Java code that declares throws IOException does not require a try-catch. None of the other five languages here have anything like checked exceptions.
+
+JavaScript can throw any value. Strings, numbers, plain objects. The convention is to throw Error instances for stack traces and instanceof checks, but the language does not enforce it. TypeScript four point four made this explicit at the type level — catch parens e colon unknown. Older code defaulted e to any, which let you call methods on it without checking. The unknown form forces you to narrow.
+
+Try as an expression. Scala and Kotlin let you write val x equals try, body, catch, handler — the whole try-catch returns a value. Java, JavaScript, TypeScript, and Python all keep try as a statement only.
+
+Move to null and undefined.
+
+The null question splits the six into three camps.
+
+Camp A. Null is everywhere, no compiler help. Java, JavaScript, Python — and Scala if you ignore Option. Any reference can be null. The compiler does not track it. NullPointerException at runtime is the norm.
+
+Camp B. Null is opt-in via the type. Kotlin and TypeScript-with-strict. The plain type String is non-nullable. The nullable form is String? in Kotlin, or string pipe null in TypeScript. The compiler refuses to dereference a nullable without a check.
+
+Camp C. Absence is a value, no special syntax. Scala's Option of T — the idiom is to use Option everywhere instead of nullable references. Same for Java's Optional of T since version eight, though Java still has null for everything else.
+
+The absent literal. Java, Scala, Kotlin, JavaScript all use the keyword null. Python uses None — capital N, capital o, capital n, capital e — a singleton with a unique identity. JavaScript also has undefined, which is distinct from null. We will get to that in a moment.
+
+Safe call. Kotlin's obj question-mark dot method is the original — if obj is null, the whole expression returns null without dereferencing. JavaScript and TypeScript added the same syntax in twenty-twenty as the optional chaining operator. Java, Scala, and Python do not have it as syntax — Scala uses Option dot map, Python writes the explicit if-not-None check.
+
+Elvis or null-coalescing. The "use this default if the value is null" operator. Kotlin uses question-mark colon, named after the Elvis Presley hairstyle the operator resembles — a question mark followed by a colon. JavaScript and TypeScript use the double question mark, called the null-coalescing operator. Scala uses opt dot getOrElse parens d. Python writes a if a is not None else d, which is verbose but explicit.
+
+Force unwrap. The "I assert this is not null, throw if it is" operator. Kotlin uses double exclamation mark — obj exclamation exclamation. Scala uses opt dot get on an Option. TypeScript uses single exclamation mark — obj exclamation — but be warned: the TypeScript exclamation is a *type assertion only*, not a runtime check. It tells the compiler to trust you. If you are wrong, you get a runtime crash with no helpful message. Java has no built-in force-unwrap; you check explicitly. JavaScript and Python do not have one.
+
+Null check. Universal across all six — if x is not null, do something. Kotlin adds smart casting on top — inside the if block, the type of x narrows from String? to String automatically, so you can call methods directly. TypeScript narrows the same way under strictNullChecks. The other four do not narrow the type — Java forces you to declare a non-null local if you want to satisfy any later assertion.
+
+Now the JavaScript null-versus-undefined story. This is worth getting right.
+
+undefined is the absence of an assignment. An uninitialized variable. A missing object property. A missing function argument. A function that does not return anything. All of these evaluate to undefined.
+
+null is an explicit "this exists and is intentionally empty". You set it with intent.
+
+Most APIs use one or the other consistently. DOM APIs return null for missing elements. JSON dot stringify drops undefined properties from output but preserves null. Most modern code follows the convention: undefined for "no value was set"; null for "value was deliberately cleared".
+
+The loose-equality check, x double-equals null, matches *both* null and undefined. This is one of the rare cases where double-equals is the right tool. Triple-equals distinguishes them — x triple-equals null does not match undefined.
+
+Python's None is the sole bottom value. Unlike JavaScript's split, Python has only None. The convention is to compare with the is operator — x is None — rather than double-equals. The is operator is identity comparison, faster than equality, and avoids surprises if the value's class overloads underscore-underscore eq. PEP eight mandates is None for this reason.
+
+Move to optional and result types. Wrapping the absence of a value as a value.
+
+The vocabulary. Option, Maybe, Optional — these are presence-or-absence types. Either, Result, Try — these are success-or-failure types that carry the failure detail.
+
+Scala has Option of T, with Some-of-x for present and None for absent. It has Try of T, with Success and Failure for caught exceptions. It has Either of L comma R, with Left for the error case and Right for the success case. The whole functional Scala style avoids exceptions entirely — operations return Either, and for-comprehensions chain them together. This is the railway-oriented programming pattern. One bad step and the rest of the chain shorts to the failure case automatically.
+
+Java added Optional of T in version eight. Optional dot of x for present, Optional dot empty for absent. It has the same map and flatMap and orElse methods you would expect. The Java API designers stated explicitly that Optional is for *return values only* — to make "this method may return nothing" visible in the signature. It is not meant for fields, parameters, or collection values. Optional inside a List of Optional is a smell. The Java Optional has no Either equivalent in the standard library — you reach for a third-party library or use exceptions.
+
+Kotlin deliberately did *not* add an Option type. Its position is that nullable types — String? — plus safe calls are the same expressivity with less ceremony. Pragmatically true in most cases. The trade-off is that question-mark only models *one level* of absence. Map of K comma V-question-mark cannot distinguish "key not present" from "key present with null value". Both return null from m bracket k. Scala's Map of K comma Option of V does distinguish — the outer get returns Option of Option of V. This is the case where Kotlin's null-shortcut over Option loses expressivity.
+
+JavaScript and TypeScript and Python do not have idiomatic Option types in their standard libraries. The closest TypeScript equivalent is the union type T pipe undefined or T pipe null. Python uses Optional of T as a type hint, which is exactly Union of T comma None — but type hints are not enforced at runtime. Tools like mypy check them statically.
+
+Move to resource management. The last cluster.
+
+Deterministic cleanup of files, sockets, locks, connections — anything where "garbage collected eventually" is not good enough. Every language here has a syntactic form for "open this, run this block, close it even if the block throws".
+
+Java's try-with-resources, since version seven. Resources go in parens at the start of try — try, parens, type variable equals open expression, parens, body braces, finally optional. Multiple resources separated by semicolons. Close happens in *reverse* declaration order — last opened, first closed — matching how a stack would unwind. The cleanup interface is AutoCloseable, with a single close method.
+
+Python's with statement is equivalent in expressiveness. with open parens "file" parens as f colon, body. Any object with underscore-underscore enter and underscore-underscore exit methods is a context manager. Multiple resources in one with — with A parens parens as a comma B parens parens as b colon — closes B before A. The contextlib standard library provides at-contextmanager, a decorator that turns a generator into a context manager — code before the yield is enter, code after, in finally, is exit. Much terser than the explicit dunder-method form, and underused.
+
+Kotlin's r dot use, curly, body, curly. This is a stdlib function on Closeable, not a language construct. It takes a lambda and guarantees close after, even if the lambda throws. Works on any Closeable. Same shape as with or using, built from a higher-order function rather than dedicated syntax.
+
+Scala has a Using object since version two point thirteen. Using parens resource parens, curly, r-arrow body, curly — same idea. Returns a Try of the body's result.
+
+JavaScript historically had only try-finally. The Stage Three Explicit Resource Management proposal adds using r equals, for synchronous, and await using r equals, for async. Both rely on new well-known symbols — Symbol dot dispose and Symbol dot asyncDispose — which any object can implement to opt into deterministic cleanup. TypeScript already supports the syntax ahead of full engine adoption.
+
+Suppressed exceptions. When the body of try-with-resources throws *and* close also throws, you would normally lose one. Java's try-with-resources keeps the body's exception as primary and attaches close's exception as suppressed — accessible via e dot getSuppressed. Python attaches the original exception as underscore-underscore context on the new one. JavaScript's using proposal defines a SuppressedError aggregate. Without these mechanisms, the close-time error silently swallows the real cause. This was a famous Java six footgun, fixed by Java seven's try-with-resources.
+
+Async cleanup. When the cleanup itself needs to await. Python's async with works with classes that implement underscore-underscore aenter and underscore-underscore aexit — async versions of the dunder methods. Kotlin's use is suspending-aware out of the box. JavaScript's await using is the proposed equivalent. Java has nothing native — you write try-finally with explicit awaits.
+
+A few cross-cutting notes before we close.
+
+Catching too much. All six let you catch the top of the exception hierarchy, and all six recommend against it. Python's bare except catches KeyboardInterrupt — blocks control-C. Java's catch Throwable catches OutOfMemoryError and StackOverflowError — almost never what you want. Kotlin and Scala the same. JavaScript's catch parens e catches everything; narrow with if e instanceof TypeError inside the block.
+
+Re-throw with context. The wrap-with-cause pattern lets you add context while preserving the original. Java — new Exception parens "context" comma e. Python — raise NewException from e. JavaScript twenty-twenty-two added the cause option — new Error parens "context" comma curly cause colon e curly. Always include the original. The lost stack trace is the second-most-painful debugging experience after a silent swallow.
+
+To recap. Exceptions diverge most on whether the compiler tracks them — Java has checked exceptions, no one else does, and Java itself has moved away from them in idiomatic modern code. Null splits the six into three camps — null-everywhere, null-opt-in-via-type, and absence-as-value. Kotlin's null safety is the cleanest of the six. JavaScript's null versus undefined is real and worth memorizing. Optional types are most idiomatic in Scala, restricted to return types in Java, and replaced by question-mark in Kotlin. Resource management has a syntactic form in every language — try-with-resources, with, use, Using, the stage-three using proposal — and they all guarantee cleanup on exception.
+
+That is topic seven. Errors, null safety, and resources. Next topic. Classes, inheritance, and pattern matching. The most divergent topic in this whole curriculum — where object-oriented mental models split most sharply across the six languages.
