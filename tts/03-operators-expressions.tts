@@ -1,0 +1,73 @@
+Welcome back. Topic three. Operators and expressions.
+
+In topic one we covered what values are. In topic two we covered names and types. Now we look at what you do with those values. How they combine. The math, the logic, the null-handling, and the deeper question of whether something is a statement or an expression.
+
+We start with the math, because that is where the first surprise lives. Integer division.
+
+In Java, Scala, and Kotlin, the slash operator behaves like C. If both operands are integer types, the result is also an integer, with the fractional part truncated. So one divided by two, with both as int, gives zero. Not zero point five. Zero. This is the original Java footgun, and it is most likely to bite you when averaging two odd numbers, where a plus b divided by two silently loses the fractional half.
+
+JavaScript and TypeScript do not have this problem, because every number is a sixty-four-bit double. There are no separate int and float types. One divided by two is always zero point five.
+
+Python chose differently in version three. The slash operator always returns a float. One divided by two is zero point five. If you want integer division, you write the double-slash operator. So one double-slash two is zero. This is one of the most-cited backwards-incompatible changes between Python two and Python three, and it eliminates the silent-truncation bug at the cost of one new operator.
+
+Modulo, multiplication, addition, subtraction are uniform. Modulo is the percent symbol in all six languages. Exponentiation diverges. Java has no operator — you call Math dot pow. Scala uses math dot pow or a library. Kotlin has the dot pow method on numbers. JavaScript, TypeScript, and Python use the double-star operator. A double-star b means a raised to the power b.
+
+Increment and decrement. Java, JavaScript, and TypeScript support plus-plus and minus-minus, in both prefix and postfix form. Scala and Kotlin deliberately do not. Python does not either. The reasoning is the same in all three. The plus-plus syntax is ambiguous to read, prefix versus postfix is confusing, and i plus-equals one is clearer anyway.
+
+String concatenation with the plus operator works in all six. In Java, if either operand is a String, the plus operator coerces both to String. Same in JavaScript with quirky coercion rules — null plus the empty string becomes the literal string quote null quote. Scala, Kotlin, Python concatenate without aggressive coercion. Both operands must already be string-like.
+
+Brief on comparison. The less-than, less-than-or-equal, greater-than, greater-than-or-equal operators work the same in all six. The interesting one is three-way comparison, sometimes called the spaceship operator. Java has Integer dot compare and Comparable dot compareTo. Scala has the compare infix method. Kotlin has dot compareTo. JavaScript, TypeScript, and Python do not have a built-in spaceship operator, though Python idiomatically subtracts two boolean expressions to fake it.
+
+The one comparison quirk worth knowing — chained comparison. Python parses one less-than x less-than ten as one less-than x AND x less-than ten. That is what you would naturally expect. Every other language in this list parses one less-than x less-than ten as one less-than x, the result of which is a boolean, then less-than ten — which is a type error or a silent coercion. So chained comparison is a Python idiom and nobody else does it.
+
+Bitwise operators. Java, Scala, JavaScript, TypeScript, and Python all use the symbol-based syntax. Ampersand for and. Pipe for or. Caret for xor. Tilde for not. Two less-than symbols for left shift. Two greater-than symbols for right shift. Three greater-than symbols for unsigned right shift.
+
+Kotlin is the odd one. Kotlin deliberately reserves ampersand and pipe for nothing, to avoid confusion with the logical double-ampersand and double-pipe. Bitwise operators in Kotlin are infix functions. You write a and b, a or b, a xor b, a shl b, a shr b, a ushr b. Looks strange at first, reads naturally after a day.
+
+Python has no unsigned right shift, because Python integers are arbitrary precision. There is no fixed bit width to be unsigned within. If you are porting bit-twiddling code from Java to Python, you mask explicitly with ampersand hex F F F F F F F F to keep the result within thirty-two bits.
+
+Now the big footgun area. Logical operators and truthiness.
+
+All six languages have logical and, logical or, logical not. All six short-circuit. In Java, Scala, Kotlin, JavaScript, and TypeScript, the syntax is double-ampersand for and, double-pipe for or, and the bang symbol for not. Python writes them out as the words and, or, not.
+
+Here is the trap. In Java, Scala, and Kotlin, double-ampersand and double-pipe always return a Boolean. The type of the expression is always Boolean. In JavaScript and Python, double-ampersand and or do not return a Boolean. They return one of the two operand values.
+
+Let me say that again because it matters. In JavaScript, if you take the empty string and apply double-pipe with the string fallback, the result is the string fallback. Not true. Because the empty string is falsy, the double-pipe operator returns the right operand as the value. In Python, zero or the string fallback returns the string fallback. Same reasoning.
+
+This is the canonical default-value idiom in dynamic languages. You write x double-pipe default to get x if x is truthy, otherwise default. And this is the canonical source of bugs. Because what if x equals zero is a valid input? What if x is the empty string and that means the user typed nothing on purpose? The double-pipe operator cannot tell those apart from null or undefined.
+
+This is exactly why JavaScript added the null-coalescing operator. Double question mark. In ES twenty-twenty and later. Double question mark triggers only on null or undefined. Zero double-question-mark default returns zero. Empty-string double-question-mark default returns the empty string. Modern JavaScript style. Use double-pipe only when you genuinely want truthy fallback. Use double-question-mark when you want null-or-undefined fallback.
+
+What counts as falsy diverges entirely. In the java virtual machine languages, only Boolean false is falsy. Conditionals require a Boolean. You cannot write an if condition that is an int or a String. Type error.
+
+In JavaScript and TypeScript, eight values are falsy. False. Zero. Negative zero. Big-int zero, written zero-n. Empty string. Null. Undefined. And NaN, which stands for not a number. Everything else is truthy. Including empty arrays, empty objects, the string quote false quote — yes, the literal string false is truthy.
+
+Python has its own falsy set. False. None. Zero. Zero point zero. Empty string. Empty list. Empty dict. Empty set. Empty tuple. Plus any object whose dunder bool method returns False, or whose dunder len method returns zero. The empty-collection rule is the one that surprises Java programmers most. The idiom if not my list is how Python checks for an empty list. Equivalent to checking the length is greater than zero.
+
+Null-handling operators. Most of these are missing from Java. Java reaches for Optional chains for the same patterns.
+
+The safe-call operator. Kotlin, TypeScript, and modern JavaScript all use question-mark-dot, the safe-call operator. x question-mark-dot foo. If x is null or undefined, the expression evaluates to null or undefined without throwing. If x is non-null, the foo property is accessed normally. Kotlin had this for a decade. JavaScript got it in ES twenty-twenty.
+
+The Elvis operator. Kotlin uses question-mark-colon, the two characters together. The name comes from the resemblance to a famous emoji of Elvis's hair. x question-mark-colon default returns x if it is non-null, default otherwise. JavaScript's null-coalescing double-question-mark is the same idea, only triggers on null or undefined, not on zero or empty string. Scala uses Option dot getOrElse on its Option type. Python convention is the verbose form, x if x is not None else default.
+
+Force unwrap. Kotlin's double-bang asserts non-null and throws KotlinNullPointerException if the value is actually null. A runtime check. TypeScript's single bang is a static-only non-null assertion. It tells the type-checker, trust me, this is not null. It emits no runtime check. If you are wrong, the failure shows up wherever you next try to use the value. Use both sparingly. They are admissions of defeat against the type system.
+
+Last cluster. Assignment, ternary, and the deep question of statement versus expression.
+
+Basic assignment looks the same in all six. Compound assignment — plus-equals, minus-equals, and friends — also looks the same in all six, with two additions in JavaScript. ES twenty-twenty added null-coalescing-equals — double-question-mark-equals — which assigns if the variable is null or undefined. And logical-or-equals — double-pipe-equals — which assigns if the variable is falsy.
+
+The ternary operator. Java, JavaScript, TypeScript use the C-style ternary. Condition, question mark, value if true, colon, value if false. Scala and Kotlin do not have a ternary operator at all. They do not need one, because if is an expression. You write val x equals if cond then a else b, using the if-else syntax to return a value. Python uses an unusual postfix syntax. a if cond else b. Reads as English. Some love it, some hate it.
+
+The deeper divide. Scala and Kotlin are expression-oriented. Almost everything produces a value. If, try, match in Scala, when in Kotlin, even a block enclosed in curly braces — all of them return their last expression. You can write val x equals try some call catch e default. The try block is the expression.
+
+Java is statement-oriented by tradition. The switch expression was added in version fourteen, so switch is now both a statement form and an expression form. Most other control flow remains statement-only. JavaScript and TypeScript are mostly statement-oriented. Ternary and arrow function expressions are the inline ways to produce values, but if and try and switch are statement-only.
+
+Python is statement-oriented with a small set of expressions. a if c else b. Lambda. Comprehensions. The walrus operator since three point eight. The walrus assigns inside an expression. Useful in comprehensions and while loops. The classic example is while paren line walrus f dot readline paren paren. Bind line to the result and check truthiness in one expression.
+
+This statement-versus-expression distinction is not a minor syntactic detail. It shapes how you structure code. Expression-oriented languages reward composing. Many small functions, returning values, no intermediate var assignments. Statement-oriented languages reward describing. Sequences of effects, mutable state, control-flow keywords. Scala and Kotlin pushed hard toward expression-orientation precisely because of this shaping effect on the programmer's mental model.
+
+Final note. Operator overloading. Scala allows almost any symbol to be defined as a method. You can define plus and minus and arrow-shaped operators on your own types. Kotlin allows it but only for a fixed set of operator names. Operator fun plus, times, minus, and so on. Python uses dunder methods. Dunder add, dunder mul, dunder e q. Java does not allow operator overloading at all. The lone exception is the plus operator for String concatenation, which is hard-coded in the compiler. JavaScript and TypeScript have no operator overloading.
+
+To recap. Integer division on the java virtual machine still truncates. JavaScript and Python's and and or do not return a boolean. They return one of the operand values, and that is both an idiom and a bug factory. The double-question-mark null-coalescing operator exists in modern JavaScript and Kotlin to handle the null case without the truthiness trap. Kotlin's double-bang is a runtime check. TypeScript's single bang is a static-only assertion. Scala and Kotlin are expression-oriented. Java is statement-oriented with growing expression support. Python is statement-oriented with a small set of expressions. And operator overloading is full in Scala, limited in Kotlin and Python, absent in Java and JavaScript.
+
+That is topic three. Operators and expressions. Next topic. Control flow. Where we look at if, switch, match, when, and the loops. And the unifying idea that all of them are about choosing which expressions get evaluated.
