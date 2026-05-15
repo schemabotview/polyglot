@@ -1,0 +1,69 @@
+Welcome to the polyglot reference, topic one. Values.
+
+This series puts six languages side by side. Java, Scala, Kotlin, JavaScript, TypeScript, and Python. The aim is not to teach you each language from scratch. You already know them. The aim is to make the differences vivid enough that you stop second-guessing which syntax belongs to which world.
+
+We start with values because everything else builds on it. Before you can talk about names, types, control flow, or classes, you need to know what a value actually is in each of these languages. And the surprising answer is, a value is not the same thing in all six.
+
+Picture three storage modes. This is the mental anchor for the whole topic. Every literal you write, every integer, every string, every boolean, compiles down to one of these three.
+
+The first mode is primitive. Java, when you write int x equals 42, stores the number 42 directly in a stack slot. Four bytes for an integer, eight for a long. No heap allocation at all. Scala and Kotlin do the same thing under the hood when the type is Int. The compiler emits a java virtual machine primitive whenever it can. So when you write val x equals 42 in Scala or Kotlin, the bytes 42 live in a register or a stack slot, and there is no heap object representing that value.
+
+The second mode is tagged or object. This is what Python and JavaScript do. In Python, the literal 42 is a full heap object. A py-int. With a refcount field, a type pointer, and the actual value inside. The variable x is a reference, a pointer, to that object. Every value in Python is an object, all the way down. JavaScript is similar conceptually, with one optimization. The V eight engine uses something called s-m-i tagging, which lets small integers live inline as tagged pointers, avoiding heap allocation for the common case. But the language model is, every value is an object reference.
+
+Both Python and JavaScript have a small-integer cache. Python pre-allocates the integers from minus five to two hundred fifty six once at interpreter startup, and reuses the same object every time you write a literal in that range. So picture this. In Python, the expression 42 is 42 is always true, because both literals point to the same cached object. But the expression 1000 is 1000 may be false, because two separate one thousand objects can be allocated. This is the kind of footgun that the storage model explains and the syntax does not.
+
+The third mode is boxed reference. This is Java's Integer, Long, Double. The wrapper classes that exist to put a primitive inside a heap object so it can be used where an object is required. Scala and Kotlin also box, but only when forced. Generics, nullable types like Kotlin's Int question mark, pattern matching, and so on. You write one type in Scala or Kotlin. The java virtual machine sees two.
+
+The classic Java footgun lives here. Integer dot value of one thousand, double equals, Integer dot value of one thousand, is false. Because each call allocates a fresh wrapper object, and double equals on objects compares references, not values. This is the single most common Java bug for newcomers, and it lives precisely at the boundary between primitive and boxed storage.
+
+So that is the picture. Primitive. Tagged or object. Boxed. Three storage stories for the same syntax. Hold that picture as we walk through the literals.
+
+The literals themselves are mostly boring. An integer is 42 in all six languages. A double is three point one four in all six. Hex is zero-x F-F. Underscore as a digit separator is supported everywhere, though Scala only added it in version two point thirteen.
+
+A few divergences worth flagging. The long literal. Java, Scala, and Kotlin all use the suffix capital L. So 42-L. JavaScript and TypeScript use a small n suffix for big int. So 42-n. Python integers are arbitrary precision by default. There is no long versus int distinction. Just int.
+
+Float versus double. Only the java virtual machine languages distinguish them, and you mark a float with a lowercase f suffix. JavaScript, TypeScript, and Python have no thirty-two-bit float type at all. All floating point is sixty-four bit.
+
+Booleans diverge in capitalization. Java, Scala, Kotlin, JavaScript, and TypeScript all use lowercase true and false. Python uses capital T True and capital F False. This is the kind of detail that bites you when context switching.
+
+Null. Java, Scala, and Kotlin use the keyword null. JavaScript and TypeScript have two empty values, null and undefined, which we will come back to in the equality section. Python uses None with a capital N and treats it as a singleton.
+
+Char literals exist only in the java virtual machine languages. Single quoted single character. Like a-pos a a-pos. JavaScript, TypeScript, and Python have no char type. Single characters are just strings of length one.
+
+String interpolation diverges entirely. Scala writes the s prefix, then a string with dollar name embedded inside. The s prefix tells the compiler this is an interpolated string. Kotlin does it without any prefix. The dollar sign in any string is interpolation by default. Python uses the f prefix, then a string with curly braces around the name. JavaScript and TypeScript use template literals with backticks and dollar curly name curly. Java only has it via the formatted method on string, which is closer to a method call than true interpolation.
+
+Moving on to bindings. How a name gets attached to a value.
+
+Across all six, you choose between immutable and mutable. Immutable means the name cannot be reassigned to point at a different value. Mutable means it can. The keywords differ.
+
+Java uses final int x equals one. The final keyword makes the binding immutable. Scala and Kotlin use val for immutable, var for mutable. JavaScript and TypeScript use const for immutable, let for mutable. Python has no immutable binding keyword at all. Convention is to use an uppercase name for constants, but the language does not enforce it.
+
+The trap to remember. Immutability of the binding is not immutability of the value. In JavaScript, const obj equals an object. You cannot reassign obj, but you can mutate obj dot a. Java's final, Scala and Kotlin's val, all have the same shallow semantics. Only Kotlin's const val, and Java's static final on a primitive or string literal, are true compile-time constants. Frozen at compile time, embedded directly into the bytecode.
+
+Lazy initialization is a value semantics feature unique to Scala and Kotlin in this list. Scala uses lazy val x equals an expression. The expression is not evaluated until the first time x is read. Kotlin uses val x by lazy, with the lazy delegate. JavaScript, TypeScript, Python, and Java have no first class lazy keyword. You write a function and call it, or use a property getter.
+
+Now we arrive at equality and identity. This is where the languages diverge most violently, and where cross-language muscle memory hurts you the most.
+
+Equality means, do these two values represent the same thing. Identity means, are these two references pointing to the same object in memory. They are different questions, and each language picks a different default for which one double equals means.
+
+Java is the original. Double equals on primitives is value equality. Double equals on objects, including string, is reference identity. To check value equality on objects, you call dot equals. So in Java, a dot equals b is the safe value comparison, and a double equals b is the dangerous reference comparison that almost never does what you want for strings.
+
+Scala inverts this. Scala's double equals calls dot equals under the hood, so double equals is value equality even for objects, including for case classes which auto-generate dot equals based on field values. For reference identity in Scala, you use the e-q operator. A, space, e q, space, b. So Scala fixes Java's most common bug, at the cost of being inconsistent with Java when you read both languages in the same day.
+
+Kotlin keeps both explicit. Double equals in Kotlin translates to dot equals, with null safety baked in. Null double equals null is true. No null pointer exception. For reference identity, Kotlin uses triple equals. So Kotlin is the mirror image of Java. Double equals is value equality. Triple equals is identity.
+
+JavaScript and TypeScript both use triple equals for value equality, with the special property that it does not coerce types. The double equals operator in JavaScript performs coerced equality. Empty string double equals zero is true. Null double equals undefined is true. This is so error prone that the standard advice is to always write triple equals and never write double equals. Except for the one useful idiom. If x double equals null, which is true for both null and undefined.
+
+Python uses double equals for value equality, calling the dunder e-q method. For identity, Python uses the is operator. A, space, i s, space, b. The strict idiom in Python is to write x is None, never x double equals None. None is a singleton, identity is the semantically correct check, and it is faster. Linters flag double equals None as an error.
+
+Summarize the equality picture. Java is double equals is identity, dot equals is value. Scala flips it. Double equals is value. E-q is identity. Kotlin flips it explicitly. Double equals is value. Triple equals is identity. JavaScript and TypeScript want triple equals for value. Double equals does coercion you do not want. Python uses double equals for value. The is operator for identity. And is None is the canonical null check.
+
+Now connect this back to the storage model. The equality footgun in Java with autoboxed integers. Integer dot value of one thousand double equals Integer dot value of one thousand is false. Is just the boxed reference world meeting the double equals is identity rule. Two different heap objects, two different references. Double equals compares references. Result is false. The fix is to call dot equals, which compares the wrapped value.
+
+To recap what you should hold in your head after this notebook. Three storage modes. Primitive. Tagged or object. Boxed reference. Which mode a literal lands in depends on the language. Sometimes on the type. Sometimes on the compilation target. The same syntax, 42, has three different stories.
+
+Bindings have an immutability axis. Final, val, var, const, let, plus Python convention. Immutability of the binding is not immutability of the value, except for true compile-time constants.
+
+Equality is the most language specific concept in this entire topic. Java is the outlier. Double equals on objects is identity. Everyone else made double equals value equality, but with different identity escape hatches. E-q in Scala. Triple equals in Kotlin and JavaScript and TypeScript. Is in Python. The cross-language muscle to develop is. Always ask, what kind of equality does this operator mean in this language.
+
+That is the end of topic one. Values. Next up. Names, types, and generics. Where we look at how the language refers to the values we just covered, and how the type system shapes that reference.
